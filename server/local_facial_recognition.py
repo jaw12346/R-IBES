@@ -3,15 +3,17 @@ import os
 import face_recognition
 import sqlite3
 from shutil import copyfile
-from PIL import Image
 from collections import namedtuple
 
 import conversions
 
 CompareResult = namedtuple('CompareResult', ['matchCount', 'notMatchCount'])
 
+__all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'generate_face_encoding',
+           'get_person_directory', 'compare_encoding_to_person', 'identify_person_from_encoding', 'CompareResult']
 
-def get_sql_encodings(name):
+
+def get_person_db_encodings(name):
     """
     Given a name retrieve all the facial encodings corresponding to that person
 
@@ -127,6 +129,7 @@ def save_face_encoding(encoding, name, file_name, source='user'):
 def generate_face_encoding(file_location, name='', source='user', debug=False):
     """
     Provided the path to an image, generate a facial encoding from that image.
+    If a name is provided, save the encoding into the DB.
 
     :param file_location: Path of a file (including file name) to generate a facial encoding
     :type file_location: str
@@ -149,6 +152,7 @@ def generate_face_encoding(file_location, name='', source='user', debug=False):
         return []
 
     if name != '':
+        # If a name is provided, save the encoding into the DB
         str_encoding = conversions.encode_ndarray_to_memoryview(encoding)
         hashed_encoding = str(hash(str_encoding))
         file_type = f'{file_location.split(".")[-1]}'  # Get the file type
@@ -206,7 +210,7 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
     start_time = time.time()
     if debug:
         print(f'Comparing {name} to {len(compare_encodings)} encodings.')
-    comparison_result = face_recognition.compare_faces(compare_encodings, encoding)
+    comparison_result = face_recognition.compare_faces(compare_encodings, encoding, tolerance=0.4)  # TODO: Experiment w/ the benchmark to determine the best tolerance
     comparison_result = CompareResult(matchCount=comparison_result.count(True),
                                       notMatchCount=comparison_result.count(False))
     if debug:
@@ -218,7 +222,7 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
     return comparison_result
 
 
-def compare_encoding_to_all(encoding, debug=False):
+def identify_person_from_encoding(encoding, debug=False):
     """
     Given an encoding, compare it to all encodings in the database to find the person's name.
 
@@ -226,7 +230,8 @@ def compare_encoding_to_all(encoding, debug=False):
     :type encoding: ndarray(128,)
     :param debug: Enables debug mode
     :type debug: bool
-    :return:
+    :return: Name of the person with the most matches or UNKNOWN if no matches were found
+    :rtype: str
     """
     start_time = time.time()
 
@@ -253,7 +258,9 @@ def compare_encoding_to_all(encoding, debug=False):
         for this_name in encodings:
             compare_encodings = encodings[this_name]
             comparison_result = compare_encoding_to_person(encoding, this_name, compare_encodings, debug)
-            if comparison_result.matchCount > comparison_result.notMatchCount:
+            match_rate = comparison_result.matchCount / (comparison_result.matchCount + comparison_result.notMatchCount)
+            if match_rate >= 0.6 and comparison_result.matchCount > comparison_result.notMatchCount:
+                # If the match rate is greater than 50% and there are more matches than not matches
                 possible_people[this_name] = comparison_result
 
         max_match = 0
@@ -264,49 +271,25 @@ def compare_encoding_to_all(encoding, debug=False):
                 max_match = comparison_result.matchCount
                 max_match_name = person
 
+        if max_match_name == '':
+            max_match_name = 'UNKNOWN'
+
         if debug:
-            print(f'Max match: {conversions.get_normalized_name(max_match_name)} @ {max_match} matches!')
+            if max_match_name == 'UNKNOWN':
+                print('No matches found!')
+            else:
+                print(f'Max match: {conversions.get_normalized_name(max_match_name)} @ {max_match} matches!')
             compare_time = time.time() - start_time
             print(f'Compared {len(rows)} encodings in {compare_time} seconds.')
+
         return max_match_name
 
 
-def align_face(df_face, file_location, debug=False):
-    """
-    Given a dataframe containing the coordinates of a face, crop the image to the face and display it
-    :param df_face: Dataframe containing the coordinates of the face
-    :type df_face: dict
-    :param file_location: Location of the file to crop
-    :type file_location: str
-    :param debug: If True, show the image for 5 seconds
-    :type debug: bool
-    :return: Location of the cropped image
-    :rtype: str
-    """
-    img = Image.open(file_location)
-    img = img.convert('L')  # Convert img to greyscale
-
-    # Get the coordinates of the face
-    x = df_face['facial_area']['x']
-    y = df_face['facial_area']['y']
-    w = df_face['facial_area']['w']
-    h = df_face['facial_area']['h']
-
-    cropped = img.crop((x, y, x + w, y + h))  # Crop the image to the face
-    if debug:
-        cropped.show()  # Display the cropped image
-        time.sleep(5)  # Show the image for 5 seconds
-
-    # Save the cropped image
-    old_name = file_location.split('/')[-1]
-    new_name = f'cropped-{old_name}'
-    new_location = file_location.split(old_name)[0] + new_name
-    cropped.save(new_location)
-    return new_location  # Return the location of the cropped image
-
-
 if __name__ == '__main__':
-    test_name = 'Jacob Weber'
-    new_file_location = './test_images/Jacob_Weber/Jacob_Weber_0003.png'
-    test_encoding = generate_face_encoding(new_file_location, test_name, debug=False)
-    most_likely_person = compare_encoding_to_all(test_encoding, debug=True)
+    # test_name = 'Jacob Weber'
+    # new_file_location = './test_images/Sam_Davis/sam_davis_0001.jpg'
+    new_file_location = './test_images/Hazel_Dellario/Hazel_Dellario_0001.jpg'
+    # new_file_location = './test_images/Jacob_Weber/Jacob_Weber_dontsave.jpg'
+    test_encoding = generate_face_encoding(new_file_location, debug=False)
+    most_likely_person = identify_person_from_encoding(test_encoding, debug=False)
+    print(f'Most likely person: {most_likely_person}')

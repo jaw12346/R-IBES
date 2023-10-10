@@ -1,6 +1,8 @@
 import numpy as np
 
 ndarray_shape = (128,)
+__all__ = ['decode_memoryview_to_ndarray', 'encode_ndarray_to_memoryview', 'get_normalized_name',
+           'get_denormalized_name', 'ndarray_shape']
 
 
 def decode_memoryview_to_ndarray(mv):

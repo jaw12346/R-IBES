@@ -3,10 +3,45 @@ import time
 import sqlite3
 from collections import namedtuple
 from deepface import DeepFace  # Must also run `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
+from PIL import Image
 
 import local_facial_recognition as lfr
 
 PeopleCount = namedtuple('PeopleCount', ['name', 'count', 'total_time'])
+
+
+def align_face(df_face, file_location, debug=False):
+    """
+    Given a dataframe containing the coordinates of a face, crop the image to the face and display it
+    :param df_face: Dataframe containing the coordinates of the face
+    :type df_face: dict
+    :param file_location: Location of the file to crop
+    :type file_location: str
+    :param debug: If True, show the image for 5 seconds
+    :type debug: bool
+    :return: Location of the cropped image
+    :rtype: str
+    """
+    img = Image.open(file_location)
+    img = img.convert('L')  # Convert img to greyscale
+
+    # Get the coordinates of the face
+    x = df_face['facial_area']['x']
+    y = df_face['facial_area']['y']
+    w = df_face['facial_area']['w']
+    h = df_face['facial_area']['h']
+
+    cropped = img.crop((x, y, x + w, y + h))  # Crop the image to the face
+    if debug:
+        cropped.show()  # Display the cropped image
+        time.sleep(5)  # Show the image for 5 seconds
+
+    # Save the cropped image
+    old_name = file_location.split('/')[-1]
+    new_name = f'cropped-{old_name}'
+    new_location = file_location.split(old_name)[0] + new_name
+    cropped.save(new_location)
+    return new_location  # Return the location of the cropped image
 
 
 def detect_faces(file_location, debug=False):
@@ -32,7 +67,7 @@ def detect_faces(file_location, debug=False):
                 best_face = face
         if debug:
             print(f'Extracting the best face in the image.')
-        cropped_path = lfr.align_face(best_face, file_location, debug)
+        cropped_path = align_face(best_face, file_location, debug)
         return cropped_path
     else:
         if debug:
