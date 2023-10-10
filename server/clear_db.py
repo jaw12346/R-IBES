@@ -3,6 +3,9 @@ import sqlite3
 
 
 def main():
+    """
+    Clear the database, delete all images, and delete file structure.
+    """
     shutil.rmtree('./images', True)
     conn = sqlite3.connect('./server/hw2.db')
     if conn:

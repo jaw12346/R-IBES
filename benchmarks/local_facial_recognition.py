@@ -2,8 +2,8 @@ import sqlite3
 import time
 from collections import namedtuple
 
-import server.local_facial_recognition as lfr
-import server.conversions as conversions
+from server import local_facial_recognition as lfr
+from server import conversions
 
 
 BenchmarkResult = namedtuple('BenchmarkResult',
@@ -11,6 +11,12 @@ BenchmarkResult = namedtuple('BenchmarkResult',
 
 
 def get_encodings():
+    """
+    Get all encodings from the database.
+
+    :return: All encodings from the database in form {name: [encoding1, encoding2, ...]}
+    :rtype: dict{str, list(ndarray(128,))}
+    """
     conn = sqlite3.connect('./server/hw2.db')
     cursor = conn.cursor()
     if conn:
@@ -78,14 +84,14 @@ def benchmark():
         current_num += 1
     total_time = time.time() - all_start
 
-    with open('local_facial_recognition_benchmark_results.txt', 'w') as f:
-        for name in all_results:
-            result = all_results[name]
-            f.write(f'{name}\t{result.match_count}\t{result.fail_count}\t{result.success_rate}\t{result.compare_time}\n')
-        f.write('-'*50 + '\n')
-        f.write(f'Lowest success rate: {lowest_success_rate:.5f}% ({lowest_success_person})\n')
-        f.write(f'Highest success rate: {highest_success_rate:.5f}% ({highest_success_person})\n')
-        f.write(f'Total time to compare all encodings: {total_time:.0f} seconds\n')
+    with open('local_facial_recognition_benchmark_results.txt', 'w') as outfile:
+        for name, result in all_results.items():
+            outfile.write(f'{name}\t{result.match_count}\t{result.fail_count}\t{result.success_rate}\t'
+                          f'{result.compare_time}\n')
+        outfile.write('-'*50 + '\n')
+        outfile.write(f'Lowest success rate: {lowest_success_rate:.5f}% ({lowest_success_person})\n')
+        outfile.write(f'Highest success rate: {highest_success_rate:.5f}% ({highest_success_person})\n')
+        outfile.write(f'Total time to compare all encodings: {total_time:.0f} seconds\n')
 
     print(f'Lowest success rate: {lowest_success_rate:.5f}% ({lowest_success_person})')
     print(f'Highest success rate: {highest_success_rate:.5f}% ({highest_success_person})')

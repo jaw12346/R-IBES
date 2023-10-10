@@ -1,5 +1,5 @@
-import boto3
 import os
+import boto3
 from botocore.exceptions import NoCredentialsError
 
 ACCESS_KEY = os.environ['S3-rekognition-demo-access']
@@ -31,8 +31,9 @@ def detect_labels(file_name):
         print("Unable to authenticate this session with AWS S3."
               "Unable to perform facial recognition procedure!")
         return False
-    except Exception as e:
-        print(f"Unknown exception occurred while attempting to perform facial recognition procedure : {e}")
+    except Exception as unknown_exception:
+        print(f"Unknown exception occurred while attempting to perform facial recognition procedure : "
+              f"{unknown_exception}")
         return False
 
     # Urls, Name, Id, Face, MatchConfidence, KnownGender

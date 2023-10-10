@@ -5,6 +5,7 @@ from collections import namedtuple
 from deepface import DeepFace  # Must also run `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
 from PIL import Image
 
+import conversions
 import local_facial_recognition as lfr
 
 PeopleCount = namedtuple('PeopleCount', ['name', 'count', 'total_time'])
@@ -66,13 +67,12 @@ def detect_faces(file_location, debug=False):
             if face['confidence'] > best_face['confidence']:
                 best_face = face
         if debug:
-            print(f'Extracting the best face in the image.')
+            print('Extracting the best face in the image.')
         cropped_path = align_face(best_face, file_location, debug)
         return cropped_path
-    else:
-        if debug:
-            print('No faces detected in the image.')
-        return None
+    if debug:
+        print('No faces detected in the image.')
+    return None
 
 
 def bulk_index(source_dir, source='user', debug=False):
@@ -94,10 +94,10 @@ def bulk_index(source_dir, source='user', debug=False):
     people_count = []
     if subdirs:
         i = 1
-        for d in subdirs:
+        for this_dir in subdirs:
             start_time = time.time()
-            images = [f'{d}/{file_name}' for file_name in os.listdir(d)]
-            name = d.split('/')[-1]
+            images = [f'{this_dir}/{file_name}' for file_name in os.listdir(this_dir)]
+            name = this_dir.split('/')[-1]
             indexed_images = 0
             for image in images:
                 if source == 'user':
@@ -106,8 +106,7 @@ def bulk_index(source_dir, source='user', debug=False):
                 if encoding is None:
                     print(f'Error generating encoding for {image}')
                     continue
-                else:
-                    indexed_images += 1
+                indexed_images += 1
             total_time = time.time() - start_time
             people_count.append(PeopleCount(name, len(images), total_time))
             if debug:
@@ -123,8 +122,7 @@ def bulk_index(source_dir, source='user', debug=False):
             if encoding is None:
                 print(f'Error generating encoding for {image}')
                 continue
-            else:
-                indexed_images += 1
+            indexed_images += 1
         total_time = time.time() - start_time
         people_count.append(PeopleCount(name, len(images), total_time))
         if debug:
@@ -159,10 +157,10 @@ def run(source_dir, source='user', debug=False):
     num_people = len(people_count)
     num_images = 0
     total_time = 0
-    with open('indexing_results.txt', 'w') as f:
+    with open('indexing_results.txt', 'w') as outfile:
         for person in people_count:
             # Name, Count, Total Time
-            f.write(f'{person.name}\t{person.count}\t{person.total_time}\n')
+            outfile.write(f'{person.name}\t{person.count}\t{person.total_time}\n')
             num_images += person.count  # Number of encodings saved for this person
             total_time += person.total_time  # Total time to save encodings for this person
 
@@ -178,12 +176,12 @@ def oops_insert_indices():
     """
     conn = sqlite3.connect('./server/hw2.db')
     cursor = conn.cursor()
-    with open('indexing_results.txt', 'r') as f:
-        lines = f.readlines()
+    with open('indexing_results.txt', 'r') as outfile:
+        lines = outfile.readlines()
         for line in lines:
             split = line.split('\t')
             name = split[0]
-            normalized_name = lfr.conversions.get_normalized_name(name)
+            normalized_name = conversions.get_normalized_name(name)
             count = int(split[1])
 
             cursor.execute("SELECT COUNT(*) FROM NAME_DIRECTORY WHERE NAME=?", (name,))  # Check if name exists

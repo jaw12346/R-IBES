@@ -5,15 +5,15 @@ __all__ = ['decode_memoryview_to_ndarray', 'encode_ndarray_to_memoryview', 'get_
            'get_denormalized_name', 'ndarray_shape']
 
 
-def decode_memoryview_to_ndarray(mv):
+def decode_memoryview_to_ndarray(to_convert):
     """
     Convert a hex memoryview to a numpy ndarray
 
-    :param mv: Memoryview to convert
-    :type mv: memoryview
+    :param to_convert: Memoryview to convert
+    :type to_convert: memoryview
     :return: ndarray(128,)
     """
-    return np.frombuffer(mv, dtype=np.float64).reshape(ndarray_shape)
+    return np.frombuffer(to_convert, dtype=np.float64).reshape(ndarray_shape)
 
 
 def encode_ndarray_to_memoryview(encoding):

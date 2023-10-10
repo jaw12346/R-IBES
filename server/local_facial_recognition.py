@@ -1,9 +1,9 @@
 import time
 import os
-import face_recognition
 import sqlite3
 from shutil import copyfile
 from collections import namedtuple
+import face_recognition
 
 import conversions
 
@@ -255,8 +255,7 @@ def identify_person_from_encoding(encoding, debug=False):
                 encodings[this_name] = [this_encoding]
 
         possible_people = {}
-        for this_name in encodings:
-            compare_encodings = encodings[this_name]
+        for this_name, compare_encodings in encodings.items():
             comparison_result = compare_encoding_to_person(encoding, this_name, compare_encodings, debug)
             match_rate = comparison_result.matchCount / (comparison_result.matchCount + comparison_result.notMatchCount)
             if match_rate >= 0.6 and comparison_result.matchCount > comparison_result.notMatchCount:
@@ -265,8 +264,7 @@ def identify_person_from_encoding(encoding, debug=False):
 
         max_match = 0
         max_match_name = ''
-        for person in possible_people:
-            comparison_result = possible_people[person]
+        for person, comparison_result in possible_people.items():
             if comparison_result.matchCount > max_match:
                 max_match = comparison_result.matchCount
                 max_match_name = person
