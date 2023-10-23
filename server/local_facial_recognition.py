@@ -5,10 +5,9 @@ from shutil import copyfile
 from collections import namedtuple
 import face_recognition
 
-import conversions
+import server.conversions as conversions
 
 CompareResult = namedtuple('CompareResult', ['matchCount', 'notMatchCount'])
-
 __all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'generate_face_encoding',
            'get_person_directory', 'compare_encoding_to_person', 'identify_person_from_encoding', 'CompareResult']
 

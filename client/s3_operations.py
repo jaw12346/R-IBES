@@ -3,8 +3,8 @@ import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 
 
-ACCESS_KEY = os.environ['S3-rekognition-demo-access']
-SECRET_KEY = os.environ['S3-rekognition-demo-secret']
+ACCESS_KEY = os.environ['S3_rekognition_demo_access']
+SECRET_KEY = os.environ['S3_rekognition_demo_secret']
 BUCKET_NAME = 'ir-hw2-proposal-09182023'
 
 

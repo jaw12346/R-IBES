@@ -28,6 +28,8 @@ def get_user_contributed_name():
 
 def user_contribution(file_name):
     first_name, last_name = get_user_contributed_name()
+    # TODO: Check if person is already in local db
+    # TODO: Encode the image and compare it to those in the local db
     # move file to a folder labeled with the firstname_lastname
     # call for rekognition or my desktop to process facial mapping
     # check if this person is already in MY db and get comparison confidence

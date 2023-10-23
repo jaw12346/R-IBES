@@ -5,8 +5,8 @@ from collections import namedtuple
 from deepface import DeepFace  # Must also run `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
 from PIL import Image
 
-import conversions
-import local_facial_recognition as lfr
+import server.conversions as conversions
+import server.local_facial_recognition as lfr
 
 PeopleCount = namedtuple('PeopleCount', ['name', 'count', 'total_time'])
 
