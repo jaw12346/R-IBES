@@ -24,7 +24,7 @@ def run_query(entity, questions, entity_link=False, debug=False):
     :param debug: Enable debug mode
     :type debug: bool
     :return: A list corresponding to the result of the question asked by the entity/questions pair.
-    :rtype: list(str) or str (if no results)
+    :rtype: list(str)
     """
     # Create the SPARQL query
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
@@ -54,7 +54,7 @@ def run_query(entity, questions, entity_link=False, debug=False):
         except Exception as e:
             # Failed to run the query
             print(f'ERROR: {e}')
-            return ''
+            return ['ERROR']
 
         answers = []
         if results["results"]["bindings"]:
@@ -79,10 +79,10 @@ def run_query(entity, questions, entity_link=False, debug=False):
                 flattened = [item for sublist in final_results for item in sublist]  # Flatten possible >1D list
                 return flattened
             else:
-                return ''  # No results
+                return ['UNKNOWN']  # No results
         else:
             # No more questions to ask
-            return answers if answers else ''
+            return answers if answers else ['UNKNOWN']
 
 
 def main():
@@ -103,6 +103,9 @@ def main():
 
     # for question in dbo_dbp:
     response = run_query(entity, bio_terms)
+    if len(response) == 1:
+        # Convert single response to string
+        response = response[0]
     print('FINAL RESPONSE: ', response)
 
 
