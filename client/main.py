@@ -2,7 +2,12 @@
 Main module for the R-IBES client.
 """
 
+import os
+import random
+
 from pyfiglet import Figlet
+from PIL import Image
+from numpy import array_equal
 
 from server import conversions
 from server import entity_search as es
@@ -80,6 +85,22 @@ def user_query():
         return query
 
 
+def random_person_image(directory):
+    """
+    Get a random image from the directory.
+    
+    :param directory: Directory to get the image from
+    :type directory: str
+    :return: Path to the image
+    :rtype: str
+    """
+    cwd = os.getcwd()
+    directory = directory.split('./')[-1]
+    directory = os.path.join(cwd, directory)
+    images = os.listdir(directory)
+    return f'{directory}/{random.choice(images)}'
+
+
 def main():
     """
     Main method for the R-IBES client.
@@ -107,10 +128,11 @@ def main():
             # Compare the search encoding to the existing encoding
             # If the search encoding is a match, we have a duplicate image
             # If the search encoding is not a match, we have a new image of the same person
-            if existing_encoding == search_encoding:
+            if array_equal(search_encoding, existing_encoding):
                 # The image the user provided already exists in the DB
                 print('Duplicate image detected in local DB! Continuing without adding to DB.')
                 duplicate_image = True
+                normalized_name = most_likely_person
                 break
 
         if not duplicate_image:
@@ -129,12 +151,31 @@ def main():
             print('Scanning local DB...')
             person_dir = lfr.get_person_directory(normalized_name)
             if person_dir:
-                # Duplicate name!
                 print(f"The name <{aws_detected.name}> already exists in the database but doesn't match the face "
                       f"you provided.")
-                print('R-IBES does not support the usage of duplicate name entries, '
-                      'so we cannot complete your query.')
-                return
+
+                random_img_path = random_person_image(person_dir)
+                img = Image.open(random_img_path)
+                img.show()
+
+                while True:
+                    response = input('Is this the same person? (y/n): ').lower().strip()
+                    if response in ('y', 'yes'):
+                        if aws_detected.match_confidence > 0.9:
+                            lfr.add_to_db(search_file_location, search_encoding, normalized_name)
+                            print(f'Added image to <{normalized_name}. Continuing with query...')
+                        else:
+                            print('AWS confidence was too low to add to local DB. Continuing with query...')
+                        break
+                    if response in ('n', 'no'):
+                        # End program
+                        print('R-IBES does not support the usage of duplicate name entries, '
+                              'so we cannot complete your query.')
+                        return
+                    else:
+                        print('Invalid response. Please try again.')
+                        continue
+
         else:
             # AWS does not recognize the person and the face doesn't match anyone in the local DB
             contribute_proceed = user_contribution.ask_contribute(search_file_location)

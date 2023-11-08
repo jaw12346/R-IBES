@@ -7,6 +7,8 @@ import os
 import sqlite3
 from shutil import copyfile
 from collections import namedtuple
+from numpy import array_equal
+
 import face_recognition
 
 from server import conversions
@@ -14,6 +16,9 @@ from server import conversions
 CompareResult = namedtuple('CompareResult', ['matchCount', 'notMatchCount'])
 __all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'generate_face_encoding',
            'get_person_directory', 'compare_encoding_to_person', 'identify_person_from_encoding', 'CompareResult']
+
+
+MAX_INT = 99999999
 
 
 def get_person_db_encodings(name, debug=False):
@@ -64,7 +69,7 @@ def add_to_db(file_location, encoding, name, source='user'):
     :return: True for successful save, False for error
     :rtype: bool
     """
-    new_file_name = generate_file_name_strenc(file_location, encoding)
+    new_file_name, _ = generate_file_name_strenc(file_location, encoding)
     save_image(file_location, name, new_file_name)
     result = save_face_encoding(encoding, name, file_location, source)
     return result
@@ -255,6 +260,13 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
     comparison_result = face_recognition.compare_faces(compare_encodings, encoding, tolerance=0.4)
     comparison_result = CompareResult(matchCount=comparison_result.count(True),
                                       notMatchCount=comparison_result.count(False))
+
+    for cmp in compare_encodings:
+        if array_equal(encoding, cmp):
+            comparison_result = CompareResult(matchCount=MAX_INT,
+                                              notMatchCount=0)
+            return comparison_result
+
     if debug:
         compare_time = time.time() - start_time
         print(f'{name}: Compared {len(compare_encodings)} '

@@ -87,7 +87,7 @@ def _run_query(entity, questions, entity_link=False, debug=False):
             final_results = []
             for answer in answers:
                 # Run the query (previous answer) on the next question
-                inner_result = _run_query(answer, questions[1:], entity_link=True)  # Recursive call
+                inner_result = _run_query(answer, questions[1:], entity_link=True, debug=debug)  # Recursive call
                 if inner_result != '':  # Ignore empty results
                     if debug:
                         print(inner_result)
@@ -222,7 +222,6 @@ def convert_to_ontology(words, ontologies):
     print('UNUSED: ', unused_words)
 
 
-
 def module_main(entity, bio_terms, debug=False):
     """
     Method to act as the entry point for the entity search module.
@@ -289,9 +288,10 @@ def main(query, name, debug=False):
     """
     dbpedia_name = conversions.get_dbpedia_name(name)
     bio_terms = query.split()
-    response = _run_query(dbpedia_name, bio_terms, debug)
+    response = _run_query(dbpedia_name, bio_terms, debug=debug)
     if debug:
         print('FINAL RESPONSE: ', response)
+    return response
 
 
 
