@@ -2,7 +2,7 @@
 File providing conversion methods for the R-IBES system.
 """
 
-import numpy as np
+from numpy import frombuffer, float64
 
 ndarray_shape = (128,)
 __all__ = ['decode_memoryview_to_ndarray', 'encode_ndarray_to_memoryview', 'get_normalized_name',
@@ -17,7 +17,7 @@ def decode_memoryview_to_ndarray(to_convert):
     :type to_convert: memoryview
     :return: ndarray(128,)
     """
-    return np.frombuffer(to_convert, dtype=np.float64).reshape(ndarray_shape)
+    return frombuffer(to_convert, dtype=float64).reshape(ndarray_shape)
 
 
 def encode_ndarray_to_memoryview(encoding):

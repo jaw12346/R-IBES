@@ -9,9 +9,9 @@ from pyfiglet import Figlet
 from PIL import Image
 from numpy import array_equal
 
-from server import conversions
-from server import entity_search as es
-from server import local_facial_recognition as lfr
+import local_facial_recognition as lfr
+import entity_search as es
+import conversions
 
 import aws_rekognition
 import user_contribution
@@ -88,7 +88,7 @@ def user_query():
 def random_person_image(directory):
     """
     Get a random image from the directory.
-    
+
     :param directory: Directory to get the image from
     :type directory: str
     :return: Path to the image

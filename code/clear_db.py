@@ -24,7 +24,7 @@ def main(proceed=False):
         time.sleep(1)
 
     shutil.rmtree('./images', True)
-    conn = sqlite3.connect('./server/hw2.db')
+    conn = sqlite3.connect('./hw2.db')
     if conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM NAME_DIRECTORY")

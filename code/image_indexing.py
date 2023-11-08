@@ -10,8 +10,8 @@ from collections import namedtuple
 from deepface import DeepFace  # Must also run `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
 from PIL import Image
 
-from server import conversions
-from server import local_facial_recognition as lfr
+import local_facial_recognition as lfr
+import conversions
 
 PeopleCount = namedtuple('PeopleCount', ['name', 'count', 'total_time'])
 
@@ -179,7 +179,7 @@ def oops_insert_indices():
     Method used purely for when you forget to enter the encoding count for a name in the database after a mass index.
     **Has no other use and should not be used.**
     """
-    conn = sqlite3.connect('./server/hw2.db')
+    conn = sqlite3.connect('./hw2.db')
     cursor = conn.cursor()
     with open('indexing_results.txt', 'r') as outfile:
         lines = outfile.readlines()

@@ -7,7 +7,7 @@ from collections import namedtuple
 import boto3
 from botocore.exceptions import NoCredentialsError
 
-from client import s3_operations
+import s3_operations
 
 AWSPersonTup = namedtuple('AWSPersonTup', ['name', 'match_confidence'])
 

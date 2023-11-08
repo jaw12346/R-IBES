@@ -6,9 +6,8 @@ import sqlite3
 import time
 from collections import namedtuple
 
-from server import local_facial_recognition as lfr
-from server import conversions
-
+import local_facial_recognition as lfr
+import conversions
 
 BenchmarkResult = namedtuple('BenchmarkResult',
                              ['match_count', 'fail_count', 'success_rate', 'compare_time'])
@@ -21,7 +20,7 @@ def get_encodings():
     :return: All encodings from the database in form {name: [encoding1, encoding2, ...]}
     :rtype: dict{str, list(ndarray(128,))}
     """
-    conn = sqlite3.connect('./server/hw2.db')
+    conn = sqlite3.connect('./hw2.db')
     cursor = conn.cursor()
     if conn:
         # Get all encodings from the database
@@ -88,7 +87,7 @@ def benchmark():
         current_num += 1
     total_time = time.time() - all_start
 
-    with open('local_facial_recognition_benchmark_results.txt', 'w') as outfile:
+    with open('./benchmarks/local_facial_recognition_benchmark_results.txt', 'w') as outfile:
         for name, result in all_results.items():
             outfile.write(f'{name}\t{result.match_count}\t{result.fail_count}\t{result.success_rate}\t'
                           f'{result.compare_time}\n')

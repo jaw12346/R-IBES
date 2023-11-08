@@ -9,7 +9,7 @@ def main():
     """
     Create the database and tables.
     """
-    conn = sqlite3.connect('./server/hw2.db')
+    conn = sqlite3.connect('./hw2.db')
     print('Opened database successfully')
     try:
         conn.execute('''CREATE TABLE NAME_DIRECTORY

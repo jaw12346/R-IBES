@@ -19,7 +19,7 @@ from collections import namedtuple
 import spacy
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-from server import conversions
+import conversions
 
 # Namedtuple for storing a label, property pair
 LabelProperty = namedtuple('LabelProperty', ['label', 'property'])

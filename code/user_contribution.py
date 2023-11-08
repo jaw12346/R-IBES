@@ -2,8 +2,8 @@
 This file contains the methods to handle user contributions to the local facial recognition database.
 """
 
-from server import conversions
-from server import local_facial_recognition as lfr
+import local_facial_recognition as lfr
+import conversions
 
 
 def get_user_contributed_name():
