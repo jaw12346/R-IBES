@@ -1,3 +1,7 @@
+"""
+Create the database and tables.
+"""
+
 import sqlite3
 
 

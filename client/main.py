@@ -1,16 +1,24 @@
+"""
+Main module for the R-IBES client.
+"""
+
 from pyfiglet import Figlet
+
+from server import conversions
+from server import entity_search as es
+from server import local_facial_recognition as lfr
 
 import aws_rekognition
 import user_contribution
 import s3_operations
-from server import local_facial_recognition as lfr
-from server import conversions
-from server import entity_search as es
 
 
 def welcome_interface():
-    f = Figlet(font='bulbhead')
-    print(f.renderText('R-IBES'))  # Reverse-Image Biographical Entity Search -- R-IBES
+    """
+    Print the welcome interface to the user.
+    """
+    fig = Figlet(font='bulbhead')
+    print(fig.renderText('R-IBES'))  # Reverse-Image Biographical Entity Search -- R-IBES
 
 
 def local_search(search_file_location, debug=False):
@@ -37,7 +45,7 @@ def aws_search(search_file_location, debug=False):
     :param debug: Enable debug mode
     :type debug: bool
     :return: AWS-detected person name or False if no person was detected
-    :rtype: awsPersonTup or bool
+    :rtype: AWSPersonTup or bool
     """
     s3_file_name = s3_operations.upload_process(search_file_location, debug=debug)
 
@@ -73,6 +81,9 @@ def user_query():
 
 
 def main():
+    """
+    Main method for the R-IBES client.
+    """
     # Gather the image and the query from the user
     search_file_location = s3_operations.get_file_from_user()
     query = user_query()
@@ -82,7 +93,7 @@ def main():
     normalized_name = ''
 
     # Image matched a person in the local db
-    if most_likely_person != 'UNKNOWN':
+    if most_likely_person != 'UNKNOWN PERSON':
         print('Match detected in local DB!')
 
         # Determine if this exact image already exists in the DB
@@ -109,9 +120,9 @@ def main():
             normalized_name = most_likely_person
 
     # If the face doesn't match any known person in the local DB, attempt to detect person using AWS Rekognition
-    elif most_likely_person == 'UNKNOWN':
+    elif most_likely_person == 'UNKNOWN PERSON':
         aws_detected = aws_search(search_file_location, debug=True)
-        if isinstance(aws_detected, aws_rekognition.awsPersonTup):
+        if isinstance(aws_detected, aws_rekognition.AWSPersonTup):
             normalized_name = conversions.get_normalized_name(aws_detected.name)
             # AWS matched the person but local db did not
             print(f'AWS successfully detected a known person <{aws_detected.name}> in the image!')
@@ -139,7 +150,6 @@ def main():
                 print('Successfully added to local DB!')
                 normalized_name = conversions.get_normalized_name(name)
 
-    # TODO: Call for IR query search lmao
     query_result = es.main(query, normalized_name, debug=True)
     print('QUERY RESULT: ', query_result)
 

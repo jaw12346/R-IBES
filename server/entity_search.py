@@ -1,4 +1,6 @@
 """
+File providing entity search functionality for the R-IBES system.
+
 Example usage:
 
 ENTITY - DBO/DBP - DBO/DBP - ...
@@ -13,9 +15,10 @@ User intention: What are George H. W. Bush's children's birthplaces' area codes?
 Allowable query: George_H._W._Bush child birthPlace areaCode
 Result: ['UNKNOWN', '203/475', '432', 'UNKNOWN', '432', '432']  # UNKNOWN due to missing value in DBPedia
 """
+from collections import namedtuple
 import spacy
 from SPARQLWrapper import SPARQLWrapper, JSON
-from collections import namedtuple
+
 from server import conversions
 
 # Namedtuple for storing a label, property pair
@@ -64,9 +67,9 @@ def _run_query(entity, questions, entity_link=False, debug=False):
         try:
             # Run the query and convert the results to JSON
             results = sparql.query().convert()
-        except Exception as e:
+        except Exception as exception:
             # Failed to run the query
-            print(f'ERROR: {e}')
+            print(f'ERROR: {exception}')
             return ['ERROR']
 
         answers = []
@@ -126,8 +129,8 @@ def get_entity_properties(entity):
     label_ontology = {}
     bindings = results['results']['bindings']
     for binding in bindings:
-        property = binding['property']['value']
-        if 'ontology' not in property and 'property' not in property:
+        binding_property = binding['property']['value']
+        if 'ontology' not in binding_property and 'property' not in binding_property:
             # Invalid property
             continue
         try:
@@ -136,10 +139,10 @@ def get_entity_properties(entity):
             # Invalid property
             continue
 
-        split_property = property.split('/')[-1]  # Get the property/ontology name from the full URL
-        if 'ontology' in property:
+        split_property = binding_property.split('/')[-1]  # Get the property/ontology name from the full URL
+        if 'ontology' in binding_property:
             label_ontology[label] = split_property
-        elif 'property' in property:
+        elif 'property' in binding_property:
             label_property[label] = split_property
 
     return label_property, label_ontology
@@ -211,7 +214,7 @@ def convert_to_ontology(words, ontologies):
             print(f'Found BASE ontology: {word} | {ontologies[word]}')
             found_ontologies.append(ontologies[word])
             continue
-        elif word not in vals and not found:
+        if word not in vals and not found:
             # Word not in ENTITY ontologies
             unused_words.append(word)
 
@@ -249,7 +252,8 @@ def independent_main():
     """
     while True:
         query = input("Enter a question in the form '<entity> <biographical_term> <biographical_term> ...'\n"
-                      "Example intention: 'What is the area code of each of George H. W. Bush's children's birthplaces?'\n"
+                      "Example intention: 'What is the area code of each of George H. W. Bush's children's "
+                      "birthplaces?'\n"
                       "Example query: 'George_H._W._Bush child birthPlace areaCode'\n")
         if len(query.split()) < 2:
             # Query must consist of (at least) an entity and a biographical term

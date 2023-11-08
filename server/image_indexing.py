@@ -1,3 +1,8 @@
+"""
+Script to bulk-index images to the local facial recognition database.
+This script can be used to index large amounts of images to the local facial recognition database.
+"""
+
 import os
 import time
 import sqlite3
@@ -5,8 +10,8 @@ from collections import namedtuple
 from deepface import DeepFace  # Must also run `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
 from PIL import Image
 
-import server.conversions as conversions
-import server.local_facial_recognition as lfr
+from server import conversions
+from server import local_facial_recognition as lfr
 
 PeopleCount = namedtuple('PeopleCount', ['name', 'count', 'total_time'])
 

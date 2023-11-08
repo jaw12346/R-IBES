@@ -1,3 +1,7 @@
+"""
+File providing conversion methods for the R-IBES system.
+"""
+
 import numpy as np
 
 ndarray_shape = (128,)

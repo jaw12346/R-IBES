@@ -1,3 +1,7 @@
+"""
+R-IBES facial recognition benchmarking script
+"""
+
 import sqlite3
 import time
 from collections import namedtuple

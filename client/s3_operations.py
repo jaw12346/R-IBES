@@ -1,14 +1,18 @@
+"""
+This file contains functions for uploading, downloading, and deleting files from an S3 bucket.
+"""
+
 import os
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 
 
-ACCESS_KEY = os.environ['S3_rekognition_demo_access']
-SECRET_KEY = os.environ['S3_rekognition_demo_secret']
-BUCKET_NAME = 'ir-hw2-proposal-09182023'
-
-
-def _get_env_vars():
+def get_env_vars():
+    """
+    Get the environment variables for the AWS S3 bucket.
+    :return: S3 access key, S3 secret key, and S3 bucket name
+    :rtype: str, str, str
+    """
     access_key = os.environ['S3_rekognition_demo_access']
     secret_key = os.environ['S3_rekognition_demo_secret']
     bucket_name = 'ir-hw2-proposal-09182023'
@@ -31,8 +35,7 @@ def get_file_from_user():
             continue
         if os.path.exists(file_path):
             return file_path
-        else:
-            print(f'The file "{file_path}" does not exist. Please try again!', end='\n\n')
+        print(f'The file "{file_path}" does not exist. Please try again!', end='\n\n')
 
 
 def upload_process(file_path, debug=False):
@@ -66,7 +69,7 @@ def upload_to_aws(local_file, s3_file, debug=False):
     :return: Success state of the upload -- True if successful, False otherwise
     :rtype: bool
     """
-    access_key, secret_key, bucket_name = _get_env_vars()
+    access_key, secret_key, bucket_name = get_env_vars()
     s3_connection = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     try:
         s3_connection.upload_file(local_file, bucket_name, s3_file)
@@ -99,7 +102,7 @@ def download_from_aws(file_name, debug=False):
     :return: Success state of the download -- True if successful, False otherwise
     :rtype: bool
     """
-    access_key, secret_key, bucket_name = _get_env_vars()
+    access_key, secret_key, bucket_name = get_env_vars()
     s3_connection = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     try:
         temp_path = os.path.join(os.getcwd(), 'tmp')
@@ -135,7 +138,7 @@ def cleanup(file_name, debug=False):
     :return: Success state of the deletion -- True if successful, False otherwise
     :rtype: bool
     """
-    access_key, secret_key, bucket_name = _get_env_vars()
+    access_key, secret_key, bucket_name = get_env_vars()
     if isinstance(file_name, list):
         for file in file_name:
             cleanup(file)

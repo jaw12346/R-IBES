@@ -1,3 +1,7 @@
+"""
+This file contains the methods to handle user contributions to the local facial recognition database.
+"""
+
 from server import conversions
 from server import local_facial_recognition as lfr
 
@@ -16,7 +20,6 @@ def get_user_contributed_name():
         if ', ' not in name:
             print("Unable to parse your input. Please make sure you provide the name in the format: "
                   "FIRST NAME, COMMA, SPACE, LAST NAME\n")
-            continue
         else:
             split = name.split(', ')
             first_name = split[0]
@@ -52,23 +55,30 @@ def contribute(file_location, upload_encoding):
         print('R-IBES does not support the usage of duplicate name entries, '
               'so we cannot complete your query.')
         return False, ''
-    else:
-        # No one with this name and face exists in the DB
-        print(f"Adding <{provided_name}> to the local DB...")
-        result = lfr.add_to_db(file_location, upload_encoding, normalized_name)
-        return result, provided_name
+
+    # No one with this name and face exists in the DB
+    print(f"Adding <{provided_name}> to the local DB...")
+    result = lfr.add_to_db(file_location, upload_encoding, normalized_name)
+    return result, provided_name
 
 
 def ask_contribute(file_path):
+    """
+    Method to ask the user if they would like to contribute to the local facial recognition database.
+
+    :param file_path: Path of the file the user provided.
+    :type file_path: str
+    :return: Whether the user consents to contributing to the local db.
+    :rtype: bool
+    """
     print(f"AWS Rekognize was unable to recognize the face provided in \"{file_path}\"")
     while True:
-        contribute = (input("Would you like to contribute to this IR system by providing this person's name? (y/n): ")
-                      .lower().strip())
-        if contribute == 'y' or contribute == 'yes':
+        response = (input("Would you like to contribute to this IR system by providing this person's name? (y/n): ")
+                    .lower().strip())
+        if response in ('y', 'yes'):
             return True
-        elif contribute == 'n' or contribute == 'no':
+        if response in ('n', 'no'):
             # End program
             return False
-        else:
-            print("Unable to interpret your response...")
-            continue
+        print("Unable to interpret your response...")
+        continue

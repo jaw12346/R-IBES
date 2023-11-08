@@ -1,3 +1,7 @@
+"""
+This file handles all the local facial recognition functionality.
+"""
+
 import time
 import os
 import sqlite3
@@ -5,7 +9,7 @@ from shutil import copyfile
 from collections import namedtuple
 import face_recognition
 
-import server.conversions as conversions
+from server import conversions
 
 CompareResult = namedtuple('CompareResult', ['matchCount', 'notMatchCount'])
 __all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'generate_face_encoding',
@@ -247,7 +251,8 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
     start_time = time.time()
     if debug:
         print(f'Comparing {name} to {len(compare_encodings)} encodings.')
-    comparison_result = face_recognition.compare_faces(compare_encodings, encoding, tolerance=0.4)  # TODO: Experiment w/ the benchmark to determine the best tolerance
+    # TODO: Experiment w/ the benchmark to determine the best tolerance value
+    comparison_result = face_recognition.compare_faces(compare_encodings, encoding, tolerance=0.4)
     comparison_result = CompareResult(matchCount=comparison_result.count(True),
                                       notMatchCount=comparison_result.count(False))
     if debug:
@@ -307,10 +312,10 @@ def identify_person_from_encoding(encoding, debug=False):
                 max_match_name = person
 
         if max_match_name == '':
-            max_match_name = 'UNKNOWN'
+            max_match_name = 'UNKNOWN PERSON'
 
         if debug:
-            if max_match_name == 'UNKNOWN':
+            if max_match_name == 'UNKNOWN PERSON':
                 print('No matches found!')
             else:
                 print(f'Max match: {conversions.get_normalized_name(max_match_name)} @ {max_match} matches!')
@@ -318,12 +323,10 @@ def identify_person_from_encoding(encoding, debug=False):
             print(f'Compared {len(rows)} encodings in {compare_time} seconds.')
 
         return max_match_name
+    return 'UNKNOWN PERSON'
 
 
 if __name__ == '__main__':
-    # test_name = 'Jacob Weber'
-    # new_file_location = './test_images/Sam_Davis/sam_davis_0001.jpg'
-    # new_file_location = './test_images/Hazel_Dellario/Hazel_Dellario_0001.jpg'
     new_file_location = './test_images/Jacob_Weber/Jacob_Weber_dontsave.jpg'
     test_encoding = generate_face_encoding(new_file_location, debug=False)
     most_likely_person = identify_person_from_encoding(test_encoding, debug=False)

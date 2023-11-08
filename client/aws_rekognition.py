@@ -1,13 +1,15 @@
-import os
-import boto3
-from botocore.exceptions import NoCredentialsError
+"""
+Module to handle AWS Rekognition API calls for facial recognition.
+"""
+
 from collections import namedtuple
 
-ACCESS_KEY = os.environ['S3_rekognition_demo_access']
-SECRET_KEY = os.environ['S3_rekognition_demo_secret']
-BUCKET_NAME = 'ir-hw2-proposal-09182023'
+import boto3
+from botocore.exceptions import NoCredentialsError
 
-awsPersonTup = namedtuple('awsPersonTup', ['name', 'match_confidence'])
+from client import s3_operations
+
+AWSPersonTup = namedtuple('AWSPersonTup', ['name', 'match_confidence'])
 
 
 def detect_labels(file_name, debug=False):
@@ -21,16 +23,17 @@ def detect_labels(file_name, debug=False):
     :type debug: bool
     :return: Tuple containing (Person's name, Match confidence, Facial feature mapping data)
              or False if an error occurred
-    :rtype: awsPersonTup or bool
+    :rtype: AWSPersonTup or bool
     """
-    client = boto3.client('rekognition', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,
+    access_key, secret_key, bucket_name = s3_operations.get_env_vars()
+    client = boto3.client('rekognition', aws_access_key_id=access_key, aws_secret_access_key=secret_key,
                           region_name='us-east-2')
 
     try:
-        response = client.recognize_celebrities(Image={'S3Object': {'Bucket': BUCKET_NAME, 'Name': file_name}})
+        response = client.recognize_celebrities(Image={'S3Object': {'Bucket': bucket_name, 'Name': file_name}})
     except FileNotFoundError:
         if debug:
-            print(f"The requested file \"{file_name}\" was not found in S3 bucket \"{BUCKET_NAME}\". "
+            print(f"The requested file \"{file_name}\" was not found in S3 bucket \"{bucket_name}\". "
                   f"Unable to perform facial recognition procedure!")
         return False
     except NoCredentialsError:
@@ -50,10 +53,9 @@ def detect_labels(file_name, debug=False):
         if 'Name' in retrieved_info and 'MatchConfidence' in retrieved_info:
             name = retrieved_info['Name']
             match_confidence = retrieved_info['MatchConfidence']
-            tup = awsPersonTup(name, match_confidence)
+            tup = AWSPersonTup(name, match_confidence)
             if debug:
                 print(tup.name, tup.match_confidence)
             return tup
-    else:
-        # AWS Rekognize was unable to match the image to a known celebrity
-        return False
+    # AWS Rekognize was unable to match the image to a known celebrity
+    return False
