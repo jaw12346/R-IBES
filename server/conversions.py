@@ -39,6 +39,20 @@ def get_normalized_name(name):
     return name.strip().lower().replace(' ', '_')
 
 
+def get_dbpedia_name(name):
+    """
+    Standard conversion from a normalized name to a DBPedia name (george_h._w._bush -> George_H._W._Bush)
+
+    :param name: Name to convert to DBPedia format (title/snake_case)
+    :type name: str
+    :return: DBPedia-formatted name
+    :rtype: str
+    """
+    spaced_name = name.replace('_', ' ')
+    titled_name = spaced_name.title()
+    return titled_name.replace(' ', '_')
+
+
 def get_denormalized_name(normalized_name):
     """
     Standard conversion from a normalized name to a denormalized name (jacob_weber -> Jacob Weber)

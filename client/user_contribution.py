@@ -1,10 +1,14 @@
+from server import conversions
+from server import local_facial_recognition as lfr
+
+
 def get_user_contributed_name():
     """
     Method to request a name from the user to save to the local facial recognition database in case AWS Rekognize was
     unable to match their provided image to a known celebrity.
 
-    :return: First Name, Last name of the person in the user-provided photo.
-    :rtype: str, str
+    :return: Full name (first last) of the person in the user-provided photo.
+    :rtype: str
     """
     print("\nThank you for offering to contribute to this IR system!")
     while True:
@@ -23,36 +27,45 @@ def get_user_contributed_name():
             if last_name is None:
                 print("Unable to parse last name. Returned as \"\".\n")
                 continue
-            return first_name, last_name
+            name = f'{first_name} {last_name}'
+            return name
 
 
-def user_contribution(file_name):
-    first_name, last_name = get_user_contributed_name()
-    # TODO: Check if person is already in local db
-    # TODO: Encode the image and compare it to those in the local db
-    # move file to a folder labeled with the firstname_lastname
-    # call for rekognition or my desktop to process facial mapping
-    # check if this person is already in MY db and get comparison confidence
-        # if high confidence or doesn't exist -> add to db with confidence=1
-        # if low confidence -> Refuse, state confidence, continue with IR search
-
-
-def manual_labeling(file_name):
+def contribute(file_location, upload_encoding):
     """
-    Method to ask the user if they would like to contribute an unmatched person to the
-    local facial recognition database.
-    :param file_name: Name of the file stored in S3 to save to the local facial recognition database.
-    :return: If the user wants to contribute: ((First Name, Last Name), Face matching confidence)
-             Else: False
-    :rtype: Tuple(Tuple(str, str), float) or bool
+    Method to add a user-provided image to the local facial recognition database.
+
+    :param file_location: Local location of the file to add to the local db
+    :type file_location: str
+    :param upload_encoding: Pre-computed encoding of the image to add to the local db
+    :type upload_encoding: ndarray(128,)
+    :return: Result of the addition to the local db (True if successful, False otherwise) AND the name of the person
+    :rtype: bool, str
     """
-    print(f"AWS Rekognize was unable to recognize the face provided in \"{file_name}\"")
+    provided_name = get_user_contributed_name().title()
+    normalized_name = conversions.get_normalized_name(provided_name)
+    person_dir = lfr.get_person_directory(normalized_name)
+    if person_dir:
+        # Duplicate name!
+        print(f"The name <{provided_name}> already exists in the database but doesn't match the face "
+              f"you provided.")
+        print('R-IBES does not support the usage of duplicate name entries, '
+              'so we cannot complete your query.')
+        return False, ''
+    else:
+        # No one with this name and face exists in the DB
+        print(f"Adding <{provided_name}> to the local DB...")
+        result = lfr.add_to_db(file_location, upload_encoding, normalized_name)
+        return result, provided_name
+
+
+def ask_contribute(file_path):
+    print(f"AWS Rekognize was unable to recognize the face provided in \"{file_path}\"")
     while True:
-        contribute = (
-            input("Would you like to contribute to this IR system by providing this person's name? (y/n): ").lower())
+        contribute = (input("Would you like to contribute to this IR system by providing this person's name? (y/n): ")
+                      .lower().strip())
         if contribute == 'y' or contribute == 'yes':
-            tup = user_contribution(file_name)  # tup = ((First name, Last name), confidence)
-            return tup
+            return True
         elif contribute == 'n' or contribute == 'no':
             # End program
             return False

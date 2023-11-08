@@ -159,3 +159,9 @@ __pycache__
 
 # Database
 *.db
+
+# Notes
+notes.md
+
+# Images
+/images

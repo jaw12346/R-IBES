@@ -12,12 +12,14 @@ __all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'gener
            'get_person_directory', 'compare_encoding_to_person', 'identify_person_from_encoding', 'CompareResult']
 
 
-def get_person_db_encodings(name):
+def get_person_db_encodings(name, debug=False):
     """
     Given a name retrieve all the facial encodings corresponding to that person
 
     :param name: Name of the person to retrieve facial encodings for
     :type name: str
+    :param debug: Enable debug mode
+    :type debug: bool
     :return: List of facial encodings corresponding to the person with name `name`
     :rtype: list(nd_array)
     """
@@ -34,10 +36,34 @@ def get_person_db_encodings(name):
         # Convert the encodings from strings to ndarrays and return them
         rows = cursor.fetchall()
         encodings = [conversions.decode_memoryview_to_ndarray(row[0]) for row in rows]
-        print(f'Found {len(encodings)} encodings for {name}')
+        if debug:
+            print(f'Found {len(encodings)} encodings for {name}')
         return encodings
-    print("Failed to connect to database.")
+    if debug:
+        print("Failed to connect to database.")
     return []
+
+
+def add_to_db(file_location, encoding, name, source='user'):
+    """
+    Save an image and pre-generated encoding into the DB without generating a new encoding
+
+    :param file_location: Location of the file to save
+    :type file_location: str
+    :param encoding: Encoding of the person in the image
+    :type encoding: ndarray(128,)
+    :param name: Name of the person in the image
+    :type name: str
+    :param source: Source of the images. Default is 'user' (user provided)
+                   but can also be databases such as 'lfw' (Labeled Faces in the Wild).
+    :type source: str
+    :return: True for successful save, False for error
+    :rtype: bool
+    """
+    new_file_name = generate_file_name_strenc(file_location, encoding)
+    save_image(file_location, name, new_file_name)
+    result = save_face_encoding(encoding, name, file_location, source)
+    return result
 
 
 def save_image(file_location, name, new_file_name):
@@ -50,7 +76,6 @@ def save_image(file_location, name, new_file_name):
     :type name: str
     :param new_file_name: Name of the file to save the image as
     :type new_file_name: str
-    :return: None
     """
 
     normalized_name = conversions.get_normalized_name(name)
@@ -77,7 +102,6 @@ def save_image(file_location, name, new_file_name):
                          (normalized_name, output_directory, 0))
             conn.commit()
         conn.close()
-
     out_file = f'{output_directory}/{new_file_name}'
     copyfile(file_location, out_file)
 
@@ -119,10 +143,27 @@ def save_face_encoding(encoding, name, file_name, source='user'):
             cursor.execute("UPDATE NAME_DIRECTORY SET ENCODING_COUNT=? WHERE NAME=?",
                            (encoding_count, normalized_name))
             conn.commit()
-
         conn.close()
         return True
     return False
+
+
+def generate_file_name_strenc(file_location, encoding):
+    """
+    Given a file location and an encoding, generate a new file name and string encoding for the image
+
+    :param file_location: Path of a file (including file name)
+    :type file_location: str
+    :param encoding: Encoding of the person in the image
+    :type encoding: ndarray(128,)
+    :return: New file name for the image
+    :rtype: str
+    """
+    str_encoding = conversions.encode_ndarray_to_memoryview(encoding)
+    hashed_encoding = str(hash(str_encoding))
+    file_type = f'{file_location.split(".")[-1]}'  # Get the file type
+    file_name = f'{hashed_encoding}.{file_type}'  # Generate a new file name
+    return file_name, str_encoding
 
 
 def generate_face_encoding(file_location, name='', source='user', debug=False):
@@ -152,10 +193,7 @@ def generate_face_encoding(file_location, name='', source='user', debug=False):
 
     if name != '':
         # If a name is provided, save the encoding into the DB
-        str_encoding = conversions.encode_ndarray_to_memoryview(encoding)
-        hashed_encoding = str(hash(str_encoding))
-        file_type = f'{file_location.split(".")[-1]}'  # Get the file type
-        file_name = f'{hashed_encoding}.{file_type}'  # Generate a new file name
+        file_name, str_encoding = generate_file_name_strenc(file_location, encoding)
         save_image(file_location, name, file_name)
         save_result = save_face_encoding(str_encoding, name, file_name, source)
         if debug:
@@ -285,8 +323,8 @@ def identify_person_from_encoding(encoding, debug=False):
 if __name__ == '__main__':
     # test_name = 'Jacob Weber'
     # new_file_location = './test_images/Sam_Davis/sam_davis_0001.jpg'
-    new_file_location = './test_images/Hazel_Dellario/Hazel_Dellario_0001.jpg'
-    # new_file_location = './test_images/Jacob_Weber/Jacob_Weber_dontsave.jpg'
+    # new_file_location = './test_images/Hazel_Dellario/Hazel_Dellario_0001.jpg'
+    new_file_location = './test_images/Jacob_Weber/Jacob_Weber_dontsave.jpg'
     test_encoding = generate_face_encoding(new_file_location, debug=False)
     most_likely_person = identify_person_from_encoding(test_encoding, debug=False)
     print(f'Most likely person: {most_likely_person}')
