@@ -93,11 +93,10 @@ def _run_query(entity, questions, entity_link=False, debug=False):
                     final_results.append(inner_result)
             if len(final_results) > 0:  # Ignore empty results
                 flattened = [item for sublist in final_results for item in sublist]  # Flatten possible >1D list
-                return flattened
+                return list(set(flattened))
             return ['UNKNOWN']  # No results
         # No more questions to ask
-        return answers if answers else ['UNKNOWN']
-
+        return list(set(answers)) if answers else ['UNKNOWN']
 
 
 def independent_main():
