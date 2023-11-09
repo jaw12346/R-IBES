@@ -222,26 +222,6 @@ def convert_to_ontology(words, ontologies):
     print('UNUSED: ', unused_words)
 
 
-def module_main(entity, bio_terms, debug=False):
-    """
-    Method to act as the entry point for the entity search module.
-
-    :param entity: Entity to search for (can be the original query's entity or a derived entity).
-    :type entity: str
-    :param bio_terms: DBO/DBP (biographical) tags to search for on a given entity page.
-    :type bio_terms: list(str)
-    :param debug: Enable debug mode
-    :type debug: bool
-    :return: A list or single string corresponding to the result of the question asked by the user's query.
-    :rtype: list(str) or str
-    """
-    response = _run_query(entity, bio_terms, debug=debug)
-    if len(response) == 1:
-        # Convert single response to string
-        response = response[0]
-    return response
-
-
 def independent_main():
     """
     Main method for the entity search module.
@@ -292,8 +272,6 @@ def main(query, name, debug=False):
     if debug:
         print('FINAL RESPONSE: ', response)
     return response
-
-
 
 
 if __name__ == '__main__':
