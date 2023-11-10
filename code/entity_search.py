@@ -6,7 +6,7 @@ from collections import namedtuple
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
 import texttable
 
-import conversions
+from code import conversions
 
 # Namedtuple for storing a label, property pair
 LabelProperty = namedtuple('LabelProperty', ['label', 'property'])
@@ -87,7 +87,7 @@ def _run_query(resource, questions, question_tracker, resource_link=False, debug
     """
     # Base case: no more questions to ask
     if not questions:
-        return {}
+        return {}, question_tracker
 
     # Recursive case: call the single query method with the first question
     question = questions[0]

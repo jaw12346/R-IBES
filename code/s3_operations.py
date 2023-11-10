@@ -27,9 +27,10 @@ def get_file_from_user():
     :rtype: str
     """
     allowed_formats = ('.jpg', '.jpeg', '.png')
-    print(os.getcwd())
     while True:
         file_path = input('Enter the path to the face file you would like to search with: ')
+        file_path = os.path.join(os.getcwd(), file_path)
+        print(os.getcwd(), file_path)
         if not file_path.endswith(allowed_formats):
             print(f'Supported file types: {list(allowed_formats)}. Please try again!', end='\n\n')
             continue

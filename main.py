@@ -9,13 +9,13 @@ from pyfiglet import Figlet
 from PIL import Image
 from numpy import array_equal
 
-import local_facial_recognition as lfr
-import entity_search as es
-import conversions
+from code import local_facial_recognition as lfr
+from code import entity_search as es
+from code import conversions
 
-import aws_rekognition
-import user_contribution
-import s3_operations
+from code import aws_rekognition
+from code import user_contribution
+from code import s3_operations
 
 
 def welcome_interface():
