@@ -1,22 +1,10 @@
 """
 File providing entity search functionality for the R-IBES system.
-
-Example usage:
-
-ENTITY - DBO/DBP - DBO/DBP - ...
-Example: Michael_Jackson - child - birthPlace - areaCode
-Result: "310"
-
-User intention: Where was Barack Obama born?
-Allowable query: Barack_Obama birthPlace
-Result: "Honolulu, Hawaii"
-
-User intention: What are George H. W. Bush's children's birthplaces' area codes?
-Allowable query: George_H._W._Bush child birthPlace areaCode
-Result: ['UNKNOWN', '203/475', '432', 'UNKNOWN', '432', '432']  # UNKNOWN due to missing value in DBPedia
 """
+
 from collections import namedtuple
-from SPARQLWrapper import SPARQLWrapper, JSON
+from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
+import texttable
 
 import conversions
 
@@ -24,110 +12,136 @@ import conversions
 LabelProperty = namedtuple('LabelProperty', ['label', 'property'])
 
 
-def _run_query(entity, questions, entity_link=False, debug=False):
+def call_dbpedia(resource, question, resource_link=False, debug=False):
     """
     Run a SPARQL query on DBpedia.
-    This method allows for recursive searches through n-levels of DBpedia for a given entity.
 
-    :param entity: Entity to search for (can be the original query's entity or a derived entity).
-    :type entity: str
-    :param questions: DBO/DBP (biographical) tags to search for on a given entity page.
-    :type questions: list(str)
-    :param entity_link: Whether the provided entity is a dbpedia link (occurs during recursive search).
-                        True if a link; False otherwise.
-    :type entity_link: bool
+    :param resource: Resource to search for (can be the original query's entity or a derived entity).
+    :type resource: str
+    :param question: DBO/DBP (biographical) tag to search for on a given entity page.
+    :type question: str
+    :param resource_link: Whether the provided resource is a dbpedia link (occurs during recursive search).
+                          True if a link; False otherwise.
+    :type resource_link: bool
     :param debug: Enable debug mode
     :type debug: bool
-    :return: A list corresponding to the result of the question asked by the entity/questions pair.
+    :return: Result of the question asked by the resource/question pair.
     :rtype: list(str)
     """
-    # Create the SPARQL query
-    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    for i, question in enumerate(questions):
-        if debug:
-            print(f'RUNNING QUERY: <{entity}> : <{question}>')
-        if entity_link:
-            # Entity is a resource link from a previous recursive call
-            sparql.setQuery(f"""
-                        SELECT ?answer WHERE {{
-                            <{entity}> <http://dbpedia.org/ontology/{question}> ?answer .
-                        }}
-            """)
-        else:
-            # Entity is a string from the original query / not a resource link
-            sparql.setQuery(f"""
-                SELECT ?answer WHERE {{
-                    <http://dbpedia.org/resource/{entity}> <http://dbpedia.org/ontology/{question}> ?answer .
-                }}
-            """)
+    sparql = SPARQLWrapper('http://dbpedia.org/sparql')
+    if debug:
+        print(f'Running query: <{resource}> : <{question}>')
+    if resource_link:
+        # Resource is a dbpedia link from a previous recursive call
+        sparql.setQuery(f"""
+                    SELECT ?answer WHERE {{
+                        <{resource}> <http://dbpedia.org/ontology/{question}> ?answer .
+                    }}
+        """)
+    else:
+        # Resource is a string from the original query / not a dbpedia link
+        # Some dbpedia "resource" redirect to "page". This is a safe redirect and doesn't inhibit the query ops
+        sparql.setQuery(f"""
+            SELECT ?answer WHERE {{
+                <http://dbpedia.org/resource/{resource}> <http://dbpedia.org/ontology/{question}> ?answer .
+            }}
+        """)
 
-        sparql.setReturnFormat(JSON)  # Set the return format to JSON
-
-        try:
-            # Run the query and convert the results to JSON
-            results = sparql.query().convert()
-        except Exception as exception:
-            # Failed to run the query
-            print(f'ERROR: {exception}')
-            return ['ERROR']
-
+    sparql.setReturnFormat(JSON)  # Set the return format to JSON
+    try:
+        # Run the query and convert the results to JSON
+        results = sparql.query().convert()
         answers = []
-        if results["results"]["bindings"]:
-            # Parse top-level results
-            for result in results["results"]["bindings"]:
-                answer = result["answer"]["value"]
-                if answer != '':  # Ignore empty results
+        if results['results']['bindings']:
+            for result in results['results']['bindings']:
+                answer = result['answer']['value']
+                if answer != '':
                     answers.append(answer)
-                    if debug:
-                        print(answer)
-
-        if i != len(questions) - 1:
-            # Continue to next question if one is available
-            final_results = []
-            for answer in answers:
-                # Run the query (previous answer) on the next question
-                inner_result = _run_query(answer, questions[1:], entity_link=True, debug=debug)  # Recursive call
-                if inner_result != '':  # Ignore empty results
-                    if debug:
-                        print(inner_result)
-                    final_results.append(inner_result)
-            if len(final_results) > 0:  # Ignore empty results
-                flattened = [item for sublist in final_results for item in sublist]  # Flatten possible >1D list
-                return list(set(flattened))
-            return ['UNKNOWN']  # No results
-        # No more questions to ask
-        return list(set(answers)) if answers else ['UNKNOWN']
+        else:
+            answers.append('UNKNOWN')
+        if len(answers) == 0:
+            return answers
+        return answers
+    except SPARQLExceptions.SPARQLWrapperException as sparql_exception:
+        print(f'Sparql DBPedia ERROR: {sparql_exception}')
+        return ['ERROR']
 
 
-def independent_main():
+def _run_query(resource, questions, question_tracker, resource_link=False, debug=False):
     """
-    Main method for the entity search module.
+    Run a recursive SPARQL query on DBpedia.
 
-    :return: A list or single string corresponding to the result of the question asked by the user's query.
-    :rtype: list(str) or str
+    :param resource: Resource to search for (can be the original query's entity or a derived entity).
+    :type resource: str
+    :param questions: A list of DBO/DBP (biographical) tags to search for on a given entity page.
+    :type questions: list(str)
+    :param resource_link: Whether the provided resource is a dbpedia link (occurs during recursive search).
+                          True if a link; False otherwise.
+    :type resource_link: bool
+    :param question_tracker: Keeps track of the answers for all the original questions in order
+    :type question_tracker: dict(list(str))
+    :param debug: Enable debug mode
+    :type debug: bool
+    :return: A dictionary of the results of the questions asked by the resource/question pairs.
+    :rtype: dict
     """
-    while True:
-        query = input("Enter a question in the form '<entity> <biographical_term> <biographical_term> ...'\n"
-                      "Example intention: 'What is the area code of each of George H. W. Bush's children's "
-                      "birthplaces?'\n"
-                      "Example query: 'George_H._W._Bush child birthPlace areaCode'\n")
-        if len(query.split()) < 2:
-            # Query must consist of (at least) an entity and a biographical term
-            print("Invalid query. Please try again.")
-            continue
-        break
-    # query = 'George_H._W._Bush child birthPlace areaCode'
+    # Base case: no more questions to ask
+    if not questions:
+        return {}
 
-    # Parse the query
-    entity = query.split()[0]
-    bio_terms = query.split()[1:]
+    # Recursive case: call the single query method with the first question
+    question = questions[0]
+    answers = call_dbpedia(resource, question, resource_link, debug)
 
-    # for question in dbo_dbp:
-    response = _run_query(entity, bio_terms)
-    if len(response) == 1:
-        # Convert single response to string
-        response = response[0]
-    print('FINAL RESPONSE: ', response)
+    # Initialize the output dictionary with the resource as the key and an empty list as the value
+    output = {resource: []}
+
+    # Loop through the answers and recursively call the method with the remaining questions
+    for answer in answers:
+        if answer == 'UNKNOWN':
+            for q in questions:
+                question_tracker[q].append('UNKNOWN')
+            break
+
+        question_tracker[question].append(answer)
+        # Create a sub-dictionary with the question as the key and the answer as the value
+        sub_dict = {question: answer}
+        # Check if the answer is a dbpedia link
+        if answer.startswith('http://dbpedia.org/'):
+            # Recursively call the method with the answer as the new resource and the remaining questions
+            sub_output, question_tracker = _run_query(answer, questions[1:], question_tracker, resource_link=True,
+                                                      debug=debug)
+            # Update the sub-dictionary with the sub-output
+            sub_dict.update(sub_output)
+        # Append the sub-dictionary to the output list
+        output[resource].append(sub_dict)
+
+    # Return the output dictionary
+    return output, question_tracker
+
+
+def make_table(tracker, questions):
+    """
+    Method to generate a table for the entity search's query output.
+
+    :param tracker: Question results
+    :type tracker: dict(list(str))
+    :param questions: Questions asked by the user
+    :type questions: list(str)
+    """
+    rows = [questions]
+    for row_num in range(len(tracker[questions[0]])):
+        vals = []
+        for question in questions:
+            vals.append(tracker[question][row_num])
+        rows.append(vals)
+
+    tableObj = texttable.Texttable(120)
+    tableObj.set_cols_align(['c' for _ in range(len(questions))])
+    tableObj.set_cols_valign(['m' for _ in range(len(questions))])
+    tableObj.set_cols_dtype(['t' for _ in range(len(questions))])
+    tableObj.add_rows(rows)
+    print(tableObj.draw())
 
 
 def main(query, name, debug=False):
@@ -144,10 +158,13 @@ def main(query, name, debug=False):
     :rtype: list(str)
     """
     dbpedia_name = conversions.get_dbpedia_name(name)
-    bio_terms = query.split()
-    response = _run_query(dbpedia_name, bio_terms, debug=debug)
+    questions = query.split()
+    question_tracker = {question: [] for question in questions}
+    response, question_tracker = _run_query(dbpedia_name, questions, question_tracker, debug=debug)
     if debug:
         print('FINAL RESPONSE: ', response)
+        print('TRACKER: ', question_tracker)
+    make_table(question_tracker, questions)
     return response
 
 
@@ -155,9 +172,3 @@ if __name__ == '__main__':
     query = 'child birthPlace areaCode'
     name = 'George_H._W._Bush'
     main(query, name, debug=True)
-
-    # independent_main()
-    # properties, ontologies = get_entity_properties('George_H._W._Bush')
-    # query = 'area code of child birth place'
-    # removed = remove_extraneous_words(query)
-    # convert_to_ontology(removed, ontologies)
