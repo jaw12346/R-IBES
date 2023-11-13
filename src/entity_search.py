@@ -36,6 +36,12 @@ class Node:
     def set_root(self):
         self._in_question = 'root'
 
+    def is_root(self):
+        return self.get_in_question() == 'root'
+
+    def set_question(self, question):
+        self._in_question = question
+
 
 def call_dbpedia(resource, question, resource_link=False, debug=False):
     """
@@ -124,8 +130,9 @@ def _run_query(resource, questions, root, resource_link=False, debug=False):
     this_node = Node(resource, question)
     for answer in answers:
         if len(questions) > 0:
-            q = questions.copy()  # Needed to copy the list, not just the reference. Otherwise, the list gets emptied
-            child = _run_query(answer, q, this_node, resource_link=True, debug=debug)
+            copied_questions = questions.copy()  # Needed to copy the list, not just the reference. Otherwise, the list gets emptied
+            child = _run_query(answer, copied_questions, this_node, resource_link=True, debug=debug)
+            child.set_question(question)
             this_node.add_child(child)
         else:
             child = Node(answer, question)
@@ -171,8 +178,9 @@ def main(query, name, debug=False):
     """
     dbpedia_name = conversions.get_dbpedia_name(name)
     questions = query.split()
-    root = Node(dbpedia_name, questions[0])
+    root = Node(dbpedia_name, 'root')
     root = _run_query(dbpedia_name, questions, root, debug=debug)
+    root.set_root()
     pass
 
 
