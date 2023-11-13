@@ -140,29 +140,12 @@ def _run_query(resource, questions, root, resource_link=False, debug=False):
     return this_node
 
 
-# def make_table(tracker, questions):
-#     """
-#     Method to generate a table for the entity search's query output.
-#
-#     :param tracker: Question results
-#     :type tracker: dict(list(str))
-#     :param questions: Questions asked by the user
-#     :type questions: list(str)
-#     """
-#     rows = [questions]
-#     row_count = len(tracker[questions[0]])
-#     for row_num in range(row_count):
-#         vals = []
-#         for question in questions:
-#             vals.append(tracker[question][row_num])
-#         rows.append(vals)
-#
-#     table_obj = texttable.Texttable(120)
-#     table_obj.set_cols_align(['c' for _ in range(len(questions))])
-#     table_obj.set_cols_valign(['m' for _ in range(len(questions))])
-#     table_obj.set_cols_dtype(['t' for _ in range(len(questions))])
-#     table_obj.add_rows(rows)
-#     print(table_obj.draw())
+def print_results(root, questions):
+    for child in root.get_children():
+        question = child.get_in_question()
+        tabs = '\t' * questions.index(question)
+        print(f"{tabs}{question}: {child.get_resource()}")
+        print_results(child, questions)
 
 
 def main(query, name, debug=False):
@@ -179,12 +162,16 @@ def main(query, name, debug=False):
     dbpedia_name = conversions.get_dbpedia_name(name)
     questions = query.split()
     root = Node(dbpedia_name, 'root')
-    root = _run_query(dbpedia_name, questions, root, debug=debug)
+    root = _run_query(dbpedia_name, questions.copy(), root, debug=debug)
     root.set_root()
+    print_results(root, questions.copy())
     pass
 
 
 if __name__ == '__main__':
-    query = 'child birthPlace areaCode'
-    name = 'George_H._W._Bush'
-    main(query, name, debug=True)
+    query = 'child parent parent child birthPlace areaCode'
+    name = 'George_W._Bush'
+    main(query, name, debug=False)
+
+# /mnt/c/IR_Project/test_images/George_W_Bush/img_1.jpg
+# child birthPlace areaCode
