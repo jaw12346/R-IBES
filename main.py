@@ -9,13 +9,13 @@ from pyfiglet import Figlet
 from PIL import Image
 from numpy import array_equal
 
-from code import local_facial_recognition as lfr
-from code import entity_search as es
-from code import conversions
+from src import local_facial_recognition as lfr
+from src import entity_search as es
+from src import conversions
 
-from code import aws_rekognition
-from code import user_contribution
-from code import s3_operations
+from src import aws_rekognition
+from src import user_contribution
+from src import s3_operations
 
 
 def welcome_interface():
@@ -70,8 +70,9 @@ def user_query():
     """
     Gather the user's query from the command line.
 
-    :return: User's query.
-    :rtype: str
+    :return: A list where each element is an independent query string.
+             Each query string is a space-separated list of terms.
+    :rtype: list(str)
     """
     while True:
         query = input("Enter a question in the form '<biographical_term> <biographical_term> ...'\n"
@@ -82,7 +83,7 @@ def user_query():
             # Query must consist of (at least) an entity and a biographical term
             print("Invalid query. Please try again.")
             continue
-        return query
+        return query.split(' AND ')
 
 
 def random_person_image(directory):
@@ -96,7 +97,6 @@ def random_person_image(directory):
     """
     cwd = os.getcwd()
     directory = directory.split('./')[-1]
-    directory = os.path.join(cwd, directory)
     images = os.listdir(directory)
     return f'{directory}/{random.choice(images)}'
 
@@ -107,7 +107,7 @@ def main():
     """
     # Gather the image and the query from the user
     search_file_location = s3_operations.get_file_from_user()
-    query = user_query()
+    queries = user_query()
 
     # First attempt to query the local DB, reducing our reliance on AWS
     most_likely_person, search_encoding = local_search(search_file_location)
@@ -143,7 +143,7 @@ def main():
 
     # If the face doesn't match any known person in the local DB, attempt to detect person using AWS Rekognition
     elif most_likely_person == 'UNKNOWN PERSON':
-        aws_detected = aws_search(search_file_location, debug=True)
+        aws_detected = aws_search(search_file_location, debug=False)
         if isinstance(aws_detected, aws_rekognition.AWSPersonTup):
             normalized_name = conversions.get_normalized_name(aws_detected.name)
             # AWS matched the person but local db did not
@@ -191,8 +191,9 @@ def main():
                 print('Successfully added to local DB!')
                 normalized_name = conversions.get_normalized_name(name)
 
-    query_result = es.main(query, normalized_name, debug=True)
-    print('QUERY RESULT: ', query_result)
+    for query in queries:
+        # Handle multiple queries
+        es.main(query, normalized_name, debug=True)
 
 
 if __name__ == '__main__':

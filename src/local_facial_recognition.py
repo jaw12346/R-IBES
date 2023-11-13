@@ -11,7 +11,7 @@ from numpy import array_equal
 
 import face_recognition
 
-from code import conversions
+from src import conversions
 
 CompareResult = namedtuple('CompareResult', ['matchCount', 'notMatchCount'])
 __all__ = ['get_person_db_encodings', 'save_image', 'save_face_encoding', 'generate_face_encoding',

@@ -6,10 +6,35 @@ from collections import namedtuple
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
 import texttable
 
-from code import conversions
+from src import conversions
 
 # Namedtuple for storing a label, property pair
 LabelProperty = namedtuple('LabelProperty', ['label', 'property'])
+
+
+class Node:
+    def __init__(self, resource, in_question):
+        self._resource = resource
+        self._in_question = in_question
+        self._children = []
+
+    def add_child(self, child):
+        if isinstance(child, list):
+            self._children.extend(child)
+        else:
+            self._children.append(child)
+
+    def get_resource(self):
+        return self._resource
+
+    def get_in_question(self):
+        return self._in_question
+
+    def get_children(self):
+        return self._children
+
+    def set_root(self):
+        self._in_question = 'root'
 
 
 def call_dbpedia(resource, question, resource_link=False, debug=False):
@@ -67,7 +92,7 @@ def call_dbpedia(resource, question, resource_link=False, debug=False):
         return ['ERROR']
 
 
-def _run_query(resource, questions, question_tracker, resource_link=False, debug=False):
+def _run_query(resource, questions, root, resource_link=False, debug=False):
     """
     Run a recursive SPARQL query on DBpedia.
 
@@ -78,70 +103,59 @@ def _run_query(resource, questions, question_tracker, resource_link=False, debug
     :param resource_link: Whether the provided resource is a dbpedia link (occurs during recursive search).
                           True if a link; False otherwise.
     :type resource_link: bool
-    :param question_tracker: Keeps track of the answers for all the original questions in order
-    :type question_tracker: dict(list(str))
+    :param root: Root node of the subtree being searched.
+    :type root: Node
     :param debug: Enable debug mode
     :type debug: bool
     :return: A dictionary of the results of the questions asked by the resource/question pairs.
     :rtype: dict
     """
-    # Base case: no more questions to ask
-    if not questions:
-        return {}, question_tracker
+    if len(questions) == 0 or resource == 'UNKNOWN':
+        child = Node(resource, root.get_in_question())
+        root.add_child(child)
+        return child
 
-    # Recursive case: call the single query method with the first question
     question = questions[0]
+    questions.pop(0)
     answers = call_dbpedia(resource, question, resource_link, debug)
+    if debug:
+        print(answers)
 
-    # Initialize the output dictionary with the resource as the key and an empty list as the value
-    output = {resource: []}
-
-    # Loop through the answers and recursively call the method with the remaining questions
+    this_node = Node(resource, question)
     for answer in answers:
-        if answer == 'UNKNOWN':
-            for q in questions:
-                question_tracker[q].append('UNKNOWN')
-            break
-
-        question_tracker[question].append(answer)
-        # Create a sub-dictionary with the question as the key and the answer as the value
-        sub_dict = {question: answer}
-        # Check if the answer is a dbpedia link
-        if answer.startswith('http://dbpedia.org/'):
-            # Recursively call the method with the answer as the new resource and the remaining questions
-            sub_output, question_tracker = _run_query(answer, questions[1:], question_tracker, resource_link=True,
-                                                      debug=debug)
-            # Update the sub-dictionary with the sub-output
-            sub_dict.update(sub_output)
-        # Append the sub-dictionary to the output list
-        output[resource].append(sub_dict)
-
-    # Return the output dictionary
-    return output, question_tracker
+        if len(questions) > 0:
+            q = questions.copy()  # Needed to copy the list, not just the reference. Otherwise, the list gets emptied
+            child = _run_query(answer, q, this_node, resource_link=True, debug=debug)
+            this_node.add_child(child)
+        else:
+            child = Node(answer, question)
+            this_node.add_child(child)
+    return this_node
 
 
-def make_table(tracker, questions):
-    """
-    Method to generate a table for the entity search's query output.
-
-    :param tracker: Question results
-    :type tracker: dict(list(str))
-    :param questions: Questions asked by the user
-    :type questions: list(str)
-    """
-    rows = [questions]
-    for row_num in range(len(tracker[questions[0]])):
-        vals = []
-        for question in questions:
-            vals.append(tracker[question][row_num])
-        rows.append(vals)
-
-    tableObj = texttable.Texttable(120)
-    tableObj.set_cols_align(['c' for _ in range(len(questions))])
-    tableObj.set_cols_valign(['m' for _ in range(len(questions))])
-    tableObj.set_cols_dtype(['t' for _ in range(len(questions))])
-    tableObj.add_rows(rows)
-    print(tableObj.draw())
+# def make_table(tracker, questions):
+#     """
+#     Method to generate a table for the entity search's query output.
+#
+#     :param tracker: Question results
+#     :type tracker: dict(list(str))
+#     :param questions: Questions asked by the user
+#     :type questions: list(str)
+#     """
+#     rows = [questions]
+#     row_count = len(tracker[questions[0]])
+#     for row_num in range(row_count):
+#         vals = []
+#         for question in questions:
+#             vals.append(tracker[question][row_num])
+#         rows.append(vals)
+#
+#     table_obj = texttable.Texttable(120)
+#     table_obj.set_cols_align(['c' for _ in range(len(questions))])
+#     table_obj.set_cols_valign(['m' for _ in range(len(questions))])
+#     table_obj.set_cols_dtype(['t' for _ in range(len(questions))])
+#     table_obj.add_rows(rows)
+#     print(table_obj.draw())
 
 
 def main(query, name, debug=False):
@@ -154,18 +168,12 @@ def main(query, name, debug=False):
     :type name: str
     :param debug: Enable debug mode
     :type debug: bool
-    :return: Query result
-    :rtype: list(str)
     """
     dbpedia_name = conversions.get_dbpedia_name(name)
     questions = query.split()
-    question_tracker = {question: [] for question in questions}
-    response, question_tracker = _run_query(dbpedia_name, questions, question_tracker, debug=debug)
-    if debug:
-        print('FINAL RESPONSE: ', response)
-        print('TRACKER: ', question_tracker)
-    make_table(question_tracker, questions)
-    return response
+    root = Node(dbpedia_name, questions[0])
+    root = _run_query(dbpedia_name, questions, root, debug=debug)
+    pass
 
 
 if __name__ == '__main__':

@@ -6,8 +6,8 @@ import sqlite3
 import time
 from collections import namedtuple
 
-from code import local_facial_recognition as lfr
-from code import conversions
+from src import local_facial_recognition as lfr
+from src import conversions
 
 BenchmarkResult = namedtuple('BenchmarkResult',
                              ['match_count', 'fail_count', 'success_rate', 'compare_time'])
