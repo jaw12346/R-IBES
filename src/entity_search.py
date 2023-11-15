@@ -4,6 +4,7 @@ File providing entity search functionality for the R-IBES system.
 
 import json
 import time
+import os
 from collections import namedtuple
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
 from PIL import Image
@@ -236,17 +237,51 @@ def add_edges(graph, node):
         add_edges(graph, child)
 
 
-def visualize_tree(root):
+def visualize_tree(root, image_name='tree.png'):
     """
     Visualize the tree using pygraphviz.
 
     :param root: Root node of the tree to visualize.
     :type root: Node
+    :param image_name: Name of the image to save the tree to.
+    :type image_name: str
     """
     graph = pgv.AGraph(directed=True)
     add_edges(graph, root)
     graph.layout(prog='dot')
-    graph.draw('tree.png')
+    graph.draw(image_name)
+
+
+def save_json(json_dict, file_name):
+    """
+    Save a JSON dictionary to a file.
+
+    :param json_dict: Dictionary to save to a file.
+    :type json_dict: dict
+    :param file_name: Name of the file to save the JSON dictionary to.
+    :type file_name: str
+    """
+    with open(file_name, 'w') as json_file:
+        json.dump(json_dict, json_file, indent=4)
+
+
+def generate_file_name(name, questions):
+    """
+    Generate a file name for the tree visualization.
+
+    :param name: Normalized name of the entity to search for.
+    :type name: str
+    :param questions: A list of DBO/DBP (biographical) tags to search for on a given entity page.
+    :type questions: list(str)
+    :return: File name for the tree visualization and file name for JSON dump.
+    :rtype: str, str
+    """
+    file_name = name.replace(' ', '_')
+    for question in questions:
+        file_name += f'-{question}'
+    if not os.path.exists('./results'):
+        os.makedirs('./results')
+    return f'./results/{file_name}.png', f'./results/{file_name}.json'
 
 
 def main(query, name, debug=False):
@@ -269,9 +304,12 @@ def main(query, name, debug=False):
 
     jsonified_tree = tree_to_dict(root)
     print_tree_dict(jsonified_tree)
-    visualize_tree(root)
-    img = Image.open('tree.png')
-    img.show()
+
+    graph_file_name, json_file_name = generate_file_name(name, questions)
+    visualize_tree(root, graph_file_name)
+    save_json(jsonified_tree, json_file_name)
+    img = Image.open(graph_file_name)
+    img.show(title=graph_file_name)
     time.sleep(1000)
 
 
