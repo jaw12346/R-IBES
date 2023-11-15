@@ -2,9 +2,13 @@
 File providing entity search functionality for the R-IBES system.
 """
 
-from collections import namedtuple
+from collections import namedtuple, deque
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
-import texttable
+from PIL import Image
+
+import json
+import time
+import pygraphviz as pgv
 
 from src import conversions
 
@@ -148,6 +152,34 @@ def print_results(root, questions):
         print_results(child, questions)
 
 
+def tree_to_dict(node):
+    if node is None:
+        return None
+
+    return {
+        "resource": node.get_resource(),
+        "in_question": node.get_in_question(),
+        "children": [tree_to_dict(child) for child in node.get_children()]
+    }
+
+
+def print_tree_dict(tree):
+    print(json.dumps(tree, indent=4))
+
+
+def add_edges(graph, node):
+    for child in node.get_children():
+        graph.add_edge(node.get_resource(), child.get_resource(), label=child.get_in_question())
+        add_edges(graph, child)
+
+
+def visualize_tree(root):
+    graph = pgv.AGraph(directed=True)
+    add_edges(graph, root)
+    graph.layout(prog='dot')
+    graph.draw('tree.png')
+
+
 def main(query, name, debug=False):
     """
     Main method for the entity search module.
@@ -162,14 +194,20 @@ def main(query, name, debug=False):
     dbpedia_name = conversions.get_dbpedia_name(name)
     questions = query.split()
     root = Node(dbpedia_name, 'root')
+
     root = _run_query(dbpedia_name, questions.copy(), root, debug=debug)
     root.set_root()
-    print_results(root, questions.copy())
-    pass
+
+    jsonified_tree = tree_to_dict(root)
+    print_tree_dict(jsonified_tree)
+    visualize_tree(root)
+    img = Image.open('tree.png')
+    img.show()
+    time.sleep(1000)
 
 
 if __name__ == '__main__':
-    query = 'child parent parent child birthPlace areaCode'
+    query = 'child birthPlace areaCode'
     name = 'George_W._Bush'
     main(query, name, debug=False)
 
