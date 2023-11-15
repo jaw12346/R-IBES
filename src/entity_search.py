@@ -2,12 +2,11 @@
 File providing entity search functionality for the R-IBES system.
 """
 
-from collections import namedtuple, deque
-from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
-from PIL import Image
-
 import json
 import time
+from collections import namedtuple
+from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
+from PIL import Image
 import pygraphviz as pgv
 
 from src import conversions
@@ -17,34 +16,83 @@ LabelProperty = namedtuple('LabelProperty', ['label', 'property'])
 
 
 class Node:
+    """
+    Node class for storing a resource and the question that was asked to get to that resource.
+    """
     def __init__(self, resource, in_question):
+        """
+        Node class for storing a resource and the question that was asked to get to that resource.
+
+        :param resource: Resource to store in the node.
+        :type resource: str
+        :param in_question: Question that was asked to get to the resource.
+        :type in_question: str
+        """
         self._resource = resource
-        self._in_question = in_question
+        self._question = in_question
         self._children = []
 
     def add_child(self, child):
+        """
+        Add a child to the node.
+
+        :param child: Child node to add to the node.
+        :type child: Node or list(Node)
+        """
         if isinstance(child, list):
             self._children.extend(child)
         else:
             self._children.append(child)
 
     def get_resource(self):
+        """
+        Get the resource of the node.
+
+        :return: Resource of the node.
+        :rtype: str
+        """
         return self._resource
 
-    def get_in_question(self):
-        return self._in_question
+    def get_question(self):
+        """
+        Get the question that was asked to get to the resource.
+
+        :return: Question that was asked to get to the resource.
+        :rtype: str
+        """
+        return self._question
+
+    def set_question(self, question):
+        """
+        Set the question that was asked to get to the resource.
+
+        :param question: Question that was asked to get to the resource.
+        :type question: str
+        """
+        self._question = question
 
     def get_children(self):
+        """
+        Get the children of the node.
+
+        :return: Children of the node.
+        :rtype: list(Node)
+        """
         return self._children
 
     def set_root(self):
-        self._in_question = 'root'
+        """
+        Set the node as the root node.
+        """
+        self._question = 'root'
 
     def is_root(self):
-        return self.get_in_question() == 'root'
-
-    def set_question(self, question):
-        self._in_question = question
+        """
+        Check if the node is the root node.
+        :return: True if the node is the root node; False otherwise.
+        :rtype: bool
+        """
+        return self.get_question() == 'root'
 
 
 def call_dbpedia(resource, question, resource_link=False, debug=False):
@@ -117,11 +165,11 @@ def _run_query(resource, questions, root, resource_link=False, debug=False):
     :type root: Node
     :param debug: Enable debug mode
     :type debug: bool
-    :return: A dictionary of the results of the questions asked by the resource/question pairs.
-    :rtype: dict
+    :return: A node containing the resource and the question that was asked to get to that resource.
+    :rtype: Node
     """
     if len(questions) == 0 or resource == 'UNKNOWN':
-        child = Node(resource, root.get_in_question())
+        child = Node(resource, root.get_question())
         root.add_child(child)
         return child
 
@@ -134,7 +182,8 @@ def _run_query(resource, questions, root, resource_link=False, debug=False):
     this_node = Node(resource, question)
     for answer in answers:
         if len(questions) > 0:
-            copied_questions = questions.copy()  # Needed to copy the list, not just the reference. Otherwise, the list gets emptied
+            # Needed to copy the list, not just the reference. Otherwise, the list gets emptied
+            copied_questions = questions.copy()
             child = _run_query(answer, copied_questions, this_node, resource_link=True, debug=debug)
             child.set_question(question)
             this_node.add_child(child)
@@ -144,36 +193,56 @@ def _run_query(resource, questions, root, resource_link=False, debug=False):
     return this_node
 
 
-def print_results(root, questions):
-    for child in root.get_children():
-        question = child.get_in_question()
-        tabs = '\t' * questions.index(question)
-        print(f"{tabs}{question}: {child.get_resource()}")
-        print_results(child, questions)
-
-
 def tree_to_dict(node):
+    """
+    Convert a tree to a dictionary recursively.
+
+    :param node: Current node to convert to add to the dictionary.
+    :type node: Node
+    :return: Dictionary representation of the tree.
+    :rtype: dict
+    """
     if node is None:
         return None
 
     return {
         "resource": node.get_resource(),
-        "in_question": node.get_in_question(),
+        "in_question": node.get_question(),
         "children": [tree_to_dict(child) for child in node.get_children()]
     }
 
 
 def print_tree_dict(tree):
+    """
+    Print the tree in a JSON format.
+
+    :param tree: Dictionary representation of the tree.
+    :type tree: dict
+    """
     print(json.dumps(tree, indent=4))
 
 
 def add_edges(graph, node):
+    """
+    Add edges to the graph recursively.
+
+    :param graph: Graph representation of the tree.
+    :type graph: AGraph
+    :param node: Current node to add edges for.
+    :type node: Node
+    """
     for child in node.get_children():
-        graph.add_edge(node.get_resource(), child.get_resource(), label=child.get_in_question())
+        graph.add_edge(node.get_resource(), child.get_resource(), label=child.get_question())
         add_edges(graph, child)
 
 
 def visualize_tree(root):
+    """
+    Visualize the tree using pygraphviz.
+
+    :param root: Root node of the tree to visualize.
+    :type root: Node
+    """
     graph = pgv.AGraph(directed=True)
     add_edges(graph, root)
     graph.layout(prog='dot')
