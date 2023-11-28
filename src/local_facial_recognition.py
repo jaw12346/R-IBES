@@ -234,7 +234,7 @@ def get_person_directory(name):
     return None
 
 
-def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
+def compare_encoding_to_person(encoding, name, compare_encodings):
     """
     Given an encoding and a person's name, compare the encoding to all encodings of that person
 
@@ -244,8 +244,6 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
     :type name: str
     :param compare_encodings: All encodings of a given person to compare the encoding to
     :type compare_encodings: list(ndarray(128,))
-    :param debug: Enables benchmarking of the comparison
-    :type debug: bool
     :return: CompareResult of the comparison
     :rtype: CompareResult
     """
@@ -253,10 +251,6 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
         print(f'No encodings found for {name}')
         return None
 
-    start_time = time.time()
-    if debug:
-        print(f'Comparing {name} to {len(compare_encodings)} encodings.')
-    # TODO: Experiment w/ the benchmark to determine the best tolerance value
     comparison_result = face_recognition.compare_faces(compare_encodings, encoding, tolerance=0.4)
     comparison_result = CompareResult(matchCount=comparison_result.count(True),
                                       notMatchCount=comparison_result.count(False))
@@ -266,12 +260,6 @@ def compare_encoding_to_person(encoding, name, compare_encodings, debug=False):
             comparison_result = CompareResult(matchCount=MAX_INT,
                                               notMatchCount=0)
             return comparison_result
-
-    if debug:
-        compare_time = time.time() - start_time
-        print(f'{name}: Compared {len(compare_encodings)} '
-              f'encodings in {compare_time} seconds.')
-        print(f'\tMatch: {comparison_result.matchCount}\n\tNot Match: {comparison_result.notMatchCount}')
 
     return comparison_result
 
@@ -310,7 +298,7 @@ def identify_person_from_encoding(encoding, debug=False):
 
         possible_people = {}
         for this_name, compare_encodings in encodings.items():
-            comparison_result = compare_encoding_to_person(encoding, this_name, compare_encodings, debug)
+            comparison_result = compare_encoding_to_person(encoding, this_name, compare_encodings)
             match_rate = comparison_result.matchCount / (comparison_result.matchCount + comparison_result.notMatchCount)
             if match_rate >= 0.6 and comparison_result.matchCount > comparison_result.notMatchCount:
                 # If the match rate is greater than 50% and there are more matches than not matches

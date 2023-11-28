@@ -4,6 +4,7 @@ This file contains functions for uploading, downloading, and deleting files from
 
 import os
 import boto3
+from dotenv import dotenv_values
 from botocore.exceptions import NoCredentialsError, ClientError
 
 
@@ -13,9 +14,10 @@ def get_env_vars():
     :return: S3 access key, S3 secret key, and S3 bucket name
     :rtype: str, str, str
     """
-    access_key = os.environ['S3_rekognition_demo_access']
-    secret_key = os.environ['S3_rekognition_demo_secret']
-    bucket_name = 'ir-hw2-proposal-09182023'
+    config = dotenv_values(".env")
+    access_key = config['S3_ACCESS_KEY']
+    secret_key = config['S3_SECRET_KEY']
+    bucket_name = config['S3_BUCKET']
     return access_key, secret_key, bucket_name
 
 
@@ -30,7 +32,6 @@ def get_file_from_user():
     while True:
         file_path = input('Enter the path to the face file you would like to search with: ')
         file_path = os.path.join(os.getcwd(), file_path)
-        print(os.getcwd(), file_path)
         if not file_path.endswith(allowed_formats):
             print(f'Supported file types: {list(allowed_formats)}. Please try again!', end='\n\n')
             continue
@@ -89,6 +90,8 @@ def upload_to_aws(local_file, s3_file, debug=False):
     except Exception as unknown_exception:
         if debug:
             print(f"Unknown exception occurred: {unknown_exception}")
+            print('Sometimes this error occurs when the time is not set correctly on your machine.\n\t'
+                  'Run `sudo hwclock -s`')
         return False
 
 

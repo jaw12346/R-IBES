@@ -4,8 +4,8 @@ Main module for the R-IBES client.
 
 import os
 import random
+import sys
 
-from pyfiglet import Figlet
 from PIL import Image
 from numpy import array_equal
 
@@ -16,14 +16,6 @@ from src import conversions
 from src import aws_rekognition
 from src import user_contribution
 from src import s3_operations
-
-
-def welcome_interface():
-    """
-    Print the welcome interface to the user.
-    """
-    fig = Figlet(font='bulbhead')
-    print(fig.renderText('R-IBES'))  # Reverse-Image Biographical Entity Search -- R-IBES
 
 
 def local_search(search_file_location, debug=False):
@@ -104,13 +96,24 @@ def random_person_image(directory):
 def main():
     """
     Main method for the R-IBES client.
+    `python3 main.py [--offline] [--debug]`
     """
+    # Determine if we are running in offline mode or debug mode from the command line
+    offline = False
+    debug = False
+    if '--offline' in sys.argv:
+        print('Running in offline mode.')
+        offline = True
+    if '--debug' in sys.argv:
+        print('Running in debug mode.')
+        debug = True
+
     # Gather the image and the query from the user
     search_file_location = s3_operations.get_file_from_user()
     queries = user_query()
 
     # First attempt to query the local DB, reducing our reliance on AWS
-    most_likely_person, search_encoding = local_search(search_file_location)
+    most_likely_person, search_encoding = local_search(search_file_location, debug)
     normalized_name = ''
 
     # Image matched a person in the local db
@@ -121,7 +124,7 @@ def main():
         duplicate_image = False
 
         # Collect all encodings of the person in the DB
-        existing_encodings = lfr.get_person_db_encodings(most_likely_person)
+        existing_encodings = lfr.get_person_db_encodings(most_likely_person, debug)
 
         # Compare the search encoding to each encoding of the person in the DB
         for existing_encoding in existing_encodings:
@@ -138,12 +141,13 @@ def main():
         if not duplicate_image:
             # Save this new image to the DB
             print('Unique image of a known person provided. Adding to local DB for future use!')
-            result = lfr.add_to_db(search_file_location, search_encoding, most_likely_person)
+            lfr.add_to_db(search_file_location, search_encoding, most_likely_person)
             normalized_name = most_likely_person
 
     # If the face doesn't match any known person in the local DB, attempt to detect person using AWS Rekognition
-    elif most_likely_person == 'UNKNOWN PERSON':
-        aws_detected = aws_search(search_file_location, debug=False)
+    # This conditional is only entered if online mode is active (S3 keys are required for AWS Rekognition)
+    elif most_likely_person == 'UNKNOWN PERSON' and not offline:
+        aws_detected = aws_search(search_file_location, debug)
         if isinstance(aws_detected, aws_rekognition.AWSPersonTup):
             normalized_name = conversions.get_normalized_name(aws_detected.name)
             # AWS matched the person but local db did not
@@ -177,7 +181,7 @@ def main():
                         continue
 
         else:
-            # AWS does not recognize the person and the face doesn't match anyone in the local DB
+            # AWS does not recognize the person (or in offline mode) and the face doesn't match anyone in the local DB
             contribute_proceed = user_contribution.ask_contribute(search_file_location)
             if not contribute_proceed:
                 # User did not want to contribute to the DB or the upload failed
@@ -193,7 +197,9 @@ def main():
 
     for query in queries:
         # Handle multiple queries
-        es.main(query, normalized_name, debug=True)
+        es.main(query, normalized_name, debug)
+
+    print('Thank you for using R-IBES. Goodbye!')
 
 
 if __name__ == '__main__':

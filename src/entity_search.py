@@ -310,13 +310,11 @@ def main(query, name, debug=False):
     save_json(jsonified_tree, json_file_name)
     img = Image.open(graph_file_name)
     img.show(title=graph_file_name)
-    time.sleep(1000)
+    while input('Press enter to continue...') != '':
+        pass
 
 
 if __name__ == '__main__':
     query = 'child birthPlace areaCode'
     name = 'George_W._Bush'
     main(query, name, debug=False)
-
-# /mnt/c/IR_Project/test_images/George_W_Bush/img_1.jpg
-# child birthPlace areaCode
