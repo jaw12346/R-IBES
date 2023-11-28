@@ -49,7 +49,6 @@ def detect_labels(file_name, debug=False):
 
     if len(response['CelebrityFaces']) > 0:
         retrieved_info = response['CelebrityFaces'][0]
-        print(retrieved_info)
         if 'Name' in retrieved_info and 'MatchConfidence' in retrieved_info:
             name = retrieved_info['Name']
             match_confidence = retrieved_info['MatchConfidence']

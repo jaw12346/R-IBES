@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src package &mdash; R-IBES: Reverse-Image Biographical Entity Search  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to R-IBES: Reverse-Image Biographical Entity Search’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            R-IBES: Reverse-Image Biographical Entity Search
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">src package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.aws_rekognition">src.aws_rekognition module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.aws_rekognition.AWSPersonTup"><code class="docutils literal notranslate"><span class="pre">AWSPersonTup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.aws_rekognition.AWSPersonTup.match_confidence"><code class="docutils literal notranslate"><span class="pre">AWSPersonTup.match_confidence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.aws_rekognition.AWSPersonTup.name"><code class="docutils literal notranslate"><span class="pre">AWSPersonTup.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.aws_rekognition.detect_labels"><code class="docutils literal notranslate"><span class="pre">detect_labels()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.benchmark_local_facial_recognition">src.benchmark_local_facial_recognition module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.benchmark_local_facial_recognition.BenchmarkResult"><code class="docutils literal notranslate"><span class="pre">BenchmarkResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.benchmark_local_facial_recognition.BenchmarkResult.compare_time"><code class="docutils literal notranslate"><span class="pre">BenchmarkResult.compare_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.benchmark_local_facial_recognition.BenchmarkResult.fail_count"><code class="docutils literal notranslate"><span class="pre">BenchmarkResult.fail_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.benchmark_local_facial_recognition.BenchmarkResult.match_count"><code class="docutils literal notranslate"><span class="pre">BenchmarkResult.match_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.benchmark_local_facial_recognition.BenchmarkResult.success_rate"><code class="docutils literal notranslate"><span class="pre">BenchmarkResult.success_rate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.benchmark_local_facial_recognition.benchmark"><code class="docutils literal notranslate"><span class="pre">benchmark()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.benchmark_local_facial_recognition.get_encodings"><code class="docutils literal notranslate"><span class="pre">get_encodings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.benchmark_local_facial_recognition.stats"><code class="docutils literal notranslate"><span class="pre">stats()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.clear_db">src.clear_db module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.clear_db.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.conversions">src.conversions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.conversions.decode_memoryview_to_ndarray"><code class="docutils literal notranslate"><span class="pre">decode_memoryview_to_ndarray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.conversions.encode_ndarray_to_memoryview"><code class="docutils literal notranslate"><span class="pre">encode_ndarray_to_memoryview()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.conversions.get_denormalized_name"><code class="docutils literal notranslate"><span class="pre">get_denormalized_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.conversions.get_normalized_name"><code class="docutils literal notranslate"><span class="pre">get_normalized_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.create_db">src.create_db module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.create_db.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.entity_search">src.entity_search module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.LabelProperty"><code class="docutils literal notranslate"><span class="pre">LabelProperty</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.LabelProperty.label"><code class="docutils literal notranslate"><span class="pre">LabelProperty.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.LabelProperty.property"><code class="docutils literal notranslate"><span class="pre">LabelProperty.property</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.Node"><code class="docutils literal notranslate"><span class="pre">Node</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.add_child"><code class="docutils literal notranslate"><span class="pre">Node.add_child()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.get_children"><code class="docutils literal notranslate"><span class="pre">Node.get_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.get_question"><code class="docutils literal notranslate"><span class="pre">Node.get_question()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.get_resource"><code class="docutils literal notranslate"><span class="pre">Node.get_resource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.is_root"><code class="docutils literal notranslate"><span class="pre">Node.is_root()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.set_question"><code class="docutils literal notranslate"><span class="pre">Node.set_question()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.entity_search.Node.set_root"><code class="docutils literal notranslate"><span class="pre">Node.set_root()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.add_edges"><code class="docutils literal notranslate"><span class="pre">add_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.call_dbpedia"><code class="docutils literal notranslate"><span class="pre">call_dbpedia()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.generate_file_name"><code class="docutils literal notranslate"><span class="pre">generate_file_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.print_tree_dict"><code class="docutils literal notranslate"><span class="pre">print_tree_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.save_json"><code class="docutils literal notranslate"><span class="pre">save_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.tree_to_dict"><code class="docutils literal notranslate"><span class="pre">tree_to_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.entity_search.visualize_tree"><code class="docutils literal notranslate"><span class="pre">visualize_tree()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.local_facial_recognition">src.local_facial_recognition module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.CompareResult"><code class="docutils literal notranslate"><span class="pre">CompareResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.local_facial_recognition.CompareResult.matchCount"><code class="docutils literal notranslate"><span class="pre">CompareResult.matchCount</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.local_facial_recognition.CompareResult.notMatchCount"><code class="docutils literal notranslate"><span class="pre">CompareResult.notMatchCount</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.compare_encoding_to_person"><code class="docutils literal notranslate"><span class="pre">compare_encoding_to_person()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.generate_face_encoding"><code class="docutils literal notranslate"><span class="pre">generate_face_encoding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.get_person_db_encodings"><code class="docutils literal notranslate"><span class="pre">get_person_db_encodings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.get_person_directory"><code class="docutils literal notranslate"><span class="pre">get_person_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.identify_person_from_encoding"><code class="docutils literal notranslate"><span class="pre">identify_person_from_encoding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.save_face_encoding"><code class="docutils literal notranslate"><span class="pre">save_face_encoding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.local_facial_recognition.save_image"><code class="docutils literal notranslate"><span class="pre">save_image()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.s3_operations">src.s3_operations module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.cleanup"><code class="docutils literal notranslate"><span class="pre">cleanup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.download_from_aws"><code class="docutils literal notranslate"><span class="pre">download_from_aws()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.get_env_vars"><code class="docutils literal notranslate"><span class="pre">get_env_vars()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.get_file_from_user"><code class="docutils literal notranslate"><span class="pre">get_file_from_user()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.upload_process"><code class="docutils literal notranslate"><span class="pre">upload_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.s3_operations.upload_to_aws"><code class="docutils literal notranslate"><span class="pre">upload_to_aws()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.user_contribution">src.user_contribution module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.user_contribution.ask_contribute"><code class="docutils literal notranslate"><span class="pre">ask_contribute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.user_contribution.contribute"><code class="docutils literal notranslate"><span class="pre">contribute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.user_contribution.get_user_contributed_name"><code class="docutils literal notranslate"><span class="pre">get_user_contributed_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">R-IBES: Reverse-Image Biographical Entity Search</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">src package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/src.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="src-package">
+<h1>src package<a class="headerlink" href="#src-package" title="Link to this heading"></a></h1>
+<section id="module-src.aws_rekognition">
+<span id="src-aws-rekognition-module"></span><h2>src.aws_rekognition module<a class="headerlink" href="#module-src.aws_rekognition" title="Link to this heading"></a></h2>
+<p>Module to handle AWS Rekognition API calls for facial recognition.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.aws_rekognition.AWSPersonTup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.aws_rekognition.</span></span><span class="sig-name descname"><span class="pre">AWSPersonTup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_confidence</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.aws_rekognition.AWSPersonTup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.aws_rekognition.AWSPersonTup.match_confidence">
+<span class="sig-name descname"><span class="pre">match_confidence</span></span><a class="headerlink" href="#src.aws_rekognition.AWSPersonTup.match_confidence" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.aws_rekognition.AWSPersonTup.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#src.aws_rekognition.AWSPersonTup.name" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.aws_rekognition.detect_labels">
+<span class="sig-prename descclassname"><span class="pre">src.aws_rekognition.</span></span><span class="sig-name descname"><span class="pre">detect_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/aws_rekognition.html#detect_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.aws_rekognition.detect_labels" title="Link to this definition"></a></dt>
+<dd><p>Method to take a file stored in S3 bucket <cite>BUCKET_NAME</cite> and send it through AWS Rekognition,
+returning facial recognition data from its celebrity database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – Name of the file to scan in Rekognize stored in S3</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple containing (Person’s name, Match confidence, Facial feature mapping data)
+or False if an error occurred</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.aws_rekognition.AWSPersonTup" title="src.aws_rekognition.AWSPersonTup">AWSPersonTup</a> or bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.benchmark_local_facial_recognition">
+<span id="src-benchmark-local-facial-recognition-module"></span><h2>src.benchmark_local_facial_recognition module<a class="headerlink" href="#module-src.benchmark_local_facial_recognition" title="Link to this heading"></a></h2>
+<p>R-IBES facial recognition benchmarking script</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.BenchmarkResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.benchmark_local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">BenchmarkResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fail_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">success_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compare_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.benchmark_local_facial_recognition.BenchmarkResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.BenchmarkResult.compare_time">
+<span class="sig-name descname"><span class="pre">compare_time</span></span><a class="headerlink" href="#src.benchmark_local_facial_recognition.BenchmarkResult.compare_time" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.BenchmarkResult.fail_count">
+<span class="sig-name descname"><span class="pre">fail_count</span></span><a class="headerlink" href="#src.benchmark_local_facial_recognition.BenchmarkResult.fail_count" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.BenchmarkResult.match_count">
+<span class="sig-name descname"><span class="pre">match_count</span></span><a class="headerlink" href="#src.benchmark_local_facial_recognition.BenchmarkResult.match_count" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.BenchmarkResult.success_rate">
+<span class="sig-name descname"><span class="pre">success_rate</span></span><a class="headerlink" href="#src.benchmark_local_facial_recognition.BenchmarkResult.success_rate" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.benchmark">
+<span class="sig-prename descclassname"><span class="pre">src.benchmark_local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">benchmark</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/benchmark_local_facial_recognition.html#benchmark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.benchmark_local_facial_recognition.benchmark" title="Link to this definition"></a></dt>
+<dd><p>Benchmark the local facial recognition system.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.get_encodings">
+<span class="sig-prename descclassname"><span class="pre">src.benchmark_local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">get_encodings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/benchmark_local_facial_recognition.html#get_encodings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.benchmark_local_facial_recognition.get_encodings" title="Link to this definition"></a></dt>
+<dd><p>Get all encodings from the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>All encodings from the database in form {name: [encoding1, encoding2, …]}</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict{str, list(ndarray(128,))}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.benchmark_local_facial_recognition.stats">
+<span class="sig-prename descclassname"><span class="pre">src.benchmark_local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success_rates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_zero_success_rates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_people</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_non_zero_success_rates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/benchmark_local_facial_recognition.html#stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.benchmark_local_facial_recognition.stats" title="Link to this definition"></a></dt>
+<dd><p>Calculate the statistics for the benchmark.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>success_rates</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – List of success rates for each person</p></li>
+<li><p><strong>avg_times</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – List of average times to compare all encodings for each person</p></li>
+<li><p><strong>num_zero_success_rates</strong> (<em>int</em>) – Number of people with 0% success rate</p></li>
+<li><p><strong>number_of_people</strong> (<em>int</em>) – Total number of people in the database</p></li>
+<li><p><strong>avg_non_zero_success_rates</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – List of success rates for each person excluding those with 0% success rates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Average success rate, average encoding comparison time, percent of people with 0% success rate,
+and average non-zero success rate</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, float, float, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.clear_db">
+<span id="src-clear-db-module"></span><h2>src.clear_db module<a class="headerlink" href="#module-src.clear_db" title="Link to this heading"></a></h2>
+<p>Running this file clears the database of all images, encodings, and names.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clear_db.main">
+<span class="sig-prename descclassname"><span class="pre">src.clear_db.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proceed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clear_db.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clear_db.main" title="Link to this definition"></a></dt>
+<dd><p>Clear the database, delete all images, and delete file structure.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.conversions">
+<span id="src-conversions-module"></span><h2>src.conversions module<a class="headerlink" href="#module-src.conversions" title="Link to this heading"></a></h2>
+<p>File providing conversion methods for the R-IBES system.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.conversions.decode_memoryview_to_ndarray">
+<span class="sig-prename descclassname"><span class="pre">src.conversions.</span></span><span class="sig-name descname"><span class="pre">decode_memoryview_to_ndarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/conversions.html#decode_memoryview_to_ndarray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.conversions.decode_memoryview_to_ndarray" title="Link to this definition"></a></dt>
+<dd><p>Convert a hex memoryview to a numpy ndarray</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>to_convert</strong> (<em>memoryview</em>) – Memoryview to convert</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(128,)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.conversions.encode_ndarray_to_memoryview">
+<span class="sig-prename descclassname"><span class="pre">src.conversions.</span></span><span class="sig-name descname"><span class="pre">encode_ndarray_to_memoryview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/conversions.html#encode_ndarray_to_memoryview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.conversions.encode_ndarray_to_memoryview" title="Link to this definition"></a></dt>
+<dd><p>Convert a facial encoding in numpy ndarray format to a hex memoryview</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoding</strong> (<em>ndarray</em><em>(</em><em>128</em><em>,</em><em>)</em>) – Facial encoding in numpy ndarray format</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Memoryview of the facial encoding</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>memoryview</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.conversions.get_denormalized_name">
+<span class="sig-prename descclassname"><span class="pre">src.conversions.</span></span><span class="sig-name descname"><span class="pre">get_denormalized_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalized_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/conversions.html#get_denormalized_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.conversions.get_denormalized_name" title="Link to this definition"></a></dt>
+<dd><p>Standard conversion from a normalized name to a denormalized name (jacob_weber -&gt; Jacob Weber)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>normalized_name</strong> (<em>str</em>) – Name to denormalize</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Denormalized name (title case, spaces instead of underscores)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.conversions.get_normalized_name">
+<span class="sig-prename descclassname"><span class="pre">src.conversions.</span></span><span class="sig-name descname"><span class="pre">get_normalized_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/conversions.html#get_normalized_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.conversions.get_normalized_name" title="Link to this definition"></a></dt>
+<dd><p>Standard conversion from a name to a normalized name (Jacob Weber -&gt; jacob_weber)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name to normalize</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized name (lowercase, underscores instead of spaces)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.create_db">
+<span id="src-create-db-module"></span><h2>src.create_db module<a class="headerlink" href="#module-src.create_db" title="Link to this heading"></a></h2>
+<p>Create the database and tables.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.create_db.main">
+<span class="sig-prename descclassname"><span class="pre">src.create_db.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/create_db.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.create_db.main" title="Link to this definition"></a></dt>
+<dd><p>Create the database and tables.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.entity_search">
+<span id="src-entity-search-module"></span><h2>src.entity_search module<a class="headerlink" href="#module-src.entity_search" title="Link to this heading"></a></h2>
+<p>File providing entity search functionality for the R-IBES system.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.entity_search.LabelProperty">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">LabelProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.entity_search.LabelProperty" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.entity_search.LabelProperty.label">
+<span class="sig-name descname"><span class="pre">label</span></span><a class="headerlink" href="#src.entity_search.LabelProperty.label" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.entity_search.LabelProperty.property">
+<span class="sig-name descname"><span class="pre">property</span></span><a class="headerlink" href="#src.entity_search.LabelProperty.property" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.entity_search.Node">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_question</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Node class for storing a resource and the question that was asked to get to that resource.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.add_child">
+<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.add_child" title="Link to this definition"></a></dt>
+<dd><p>Add a child to the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>child</strong> (<a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node"><em>Node</em></a><em> or </em><em>list</em><em>(</em><a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node"><em>Node</em></a><em>)</em>) – Child node to add to the node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.get_children">
+<span class="sig-name descname"><span class="pre">get_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.get_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.get_children" title="Link to this definition"></a></dt>
+<dd><p>Get the children of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Children of the node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list(<a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node">Node</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.get_question">
+<span class="sig-name descname"><span class="pre">get_question</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.get_question"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.get_question" title="Link to this definition"></a></dt>
+<dd><p>Get the question that was asked to get to the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Question that was asked to get to the resource.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.get_resource">
+<span class="sig-name descname"><span class="pre">get_resource</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.get_resource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.get_resource" title="Link to this definition"></a></dt>
+<dd><p>Get the resource of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Resource of the node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.is_root">
+<span class="sig-name descname"><span class="pre">is_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.is_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.is_root" title="Link to this definition"></a></dt>
+<dd><p>Check if the node is the root node.
+:return: True if the node is the root node; False otherwise.
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.set_question">
+<span class="sig-name descname"><span class="pre">set_question</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.set_question"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.set_question" title="Link to this definition"></a></dt>
+<dd><p>Set the question that was asked to get to the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>question</strong> (<em>str</em>) – Question that was asked to get to the resource.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.entity_search.Node.set_root">
+<span class="sig-name descname"><span class="pre">set_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#Node.set_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.Node.set_root" title="Link to this definition"></a></dt>
+<dd><p>Set the node as the root node.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.add_edges">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">add_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#add_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.add_edges" title="Link to this definition"></a></dt>
+<dd><p>Add edges to the graph recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>AGraph</em>) – Graph representation of the tree.</p></li>
+<li><p><strong>node</strong> (<a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node"><em>Node</em></a>) – Current node to add edges for.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.call_dbpedia">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">call_dbpedia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#call_dbpedia"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.call_dbpedia" title="Link to this definition"></a></dt>
+<dd><p>Run a SPARQL query on DBpedia.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resource</strong> (<em>str</em>) – Resource to search for (can be the original query’s entity or a derived entity).</p></li>
+<li><p><strong>question</strong> (<em>str</em>) – DBO/DBP (biographical) tag to search for on a given entity page.</p></li>
+<li><p><strong>resource_link</strong> (<em>bool</em>) – Whether the provided resource is a dbpedia link (occurs during recursive search).
+True if a link; False otherwise.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of the question asked by the resource/question pair.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.generate_file_name">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">generate_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">questions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#generate_file_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.generate_file_name" title="Link to this definition"></a></dt>
+<dd><p>Generate a file name for the tree visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Normalized name of the entity to search for.</p></li>
+<li><p><strong>questions</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – A list of DBO/DBP (biographical) tags to search for on a given entity page.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>File name for the tree visualization and file name for JSON dump.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str, str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.main">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.main" title="Link to this definition"></a></dt>
+<dd><p>Main method for the entity search module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<em>str</em>) – Query to run on the given entity. Query terms must be in the form of DBO/DBP tags.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Normalized name of the entity to search for.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.print_tree_dict">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">print_tree_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#print_tree_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.print_tree_dict" title="Link to this definition"></a></dt>
+<dd><p>Print the tree in a JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<em>dict</em>) – Dictionary representation of the tree.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.save_json">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">save_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#save_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.save_json" title="Link to this definition"></a></dt>
+<dd><p>Save a JSON dictionary to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_dict</strong> (<em>dict</em>) – Dictionary to save to a file.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – Name of the file to save the JSON dictionary to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.tree_to_dict">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">tree_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#tree_to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.tree_to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert a tree to a dictionary recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node"><em>Node</em></a>) – Current node to convert to add to the dictionary.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary representation of the tree.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.entity_search.visualize_tree">
+<span class="sig-prename descclassname"><span class="pre">src.entity_search.</span></span><span class="sig-name descname"><span class="pre">visualize_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tree.png'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/entity_search.html#visualize_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.entity_search.visualize_tree" title="Link to this definition"></a></dt>
+<dd><p>Visualize the tree using pygraphviz.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<a class="reference internal" href="#src.entity_search.Node" title="src.entity_search.Node"><em>Node</em></a>) – Root node of the tree to visualize.</p></li>
+<li><p><strong>image_name</strong> (<em>str</em>) – Name of the image to save the tree to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.local_facial_recognition">
+<span id="src-local-facial-recognition-module"></span><h2>src.local_facial_recognition module<a class="headerlink" href="#module-src.local_facial_recognition" title="Link to this heading"></a></h2>
+<p>This file handles all the local facial recognition functionality.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.local_facial_recognition.CompareResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">CompareResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matchCount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notMatchCount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.local_facial_recognition.CompareResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.local_facial_recognition.CompareResult.matchCount">
+<span class="sig-name descname"><span class="pre">matchCount</span></span><a class="headerlink" href="#src.local_facial_recognition.CompareResult.matchCount" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.local_facial_recognition.CompareResult.notMatchCount">
+<span class="sig-name descname"><span class="pre">notMatchCount</span></span><a class="headerlink" href="#src.local_facial_recognition.CompareResult.notMatchCount" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.compare_encoding_to_person">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">compare_encoding_to_person</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compare_encodings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#compare_encoding_to_person"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.compare_encoding_to_person" title="Link to this definition"></a></dt>
+<dd><p>Given an encoding and a person’s name, compare the encoding to all encodings of that person</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding</strong> (<em>ndarray</em><em>(</em><em>128</em><em>,</em><em>)</em>) – Encoding to compare against all encodings of the person</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the person to compare the encoding to</p></li>
+<li><p><strong>compare_encodings</strong> (<em>list</em><em>(</em><em>ndarray</em><em>(</em><em>128</em><em>,</em><em>)</em><em>)</em>) – All encodings of a given person to compare the encoding to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CompareResult of the comparison</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.local_facial_recognition.CompareResult" title="src.local_facial_recognition.CompareResult">CompareResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.generate_face_encoding">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">generate_face_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#generate_face_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.generate_face_encoding" title="Link to this definition"></a></dt>
+<dd><p>Provided the path to an image, generate a facial encoding from that image.
+If a name is provided, save the encoding into the DB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_location</strong> (<em>str</em>) – Path of a file (including file name) to generate a facial encoding</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> or </em><em>None</em>) – Name of the person in the picture (optional)</p></li>
+<li><p><strong>source</strong> (<em>str</em>) – Source of the images. Default is ‘user’ (user provided)
+but can also be databases such as ‘lfw’ (Labeled Faces in the Wild).</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, print debug statements</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of 128-dimensional face encodings</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.get_person_db_encodings">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">get_person_db_encodings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#get_person_db_encodings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.get_person_db_encodings" title="Link to this definition"></a></dt>
+<dd><p>Given a name retrieve all the facial encodings corresponding to that person</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the person to retrieve facial encodings for</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of facial encodings corresponding to the person with name <cite>name</cite></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(nd_array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.get_person_directory">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">get_person_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#get_person_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.get_person_directory" title="Link to this definition"></a></dt>
+<dd><p>Given a name, retrieve the directory of that person</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the person to retrieve the directory for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Directory of the person</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.identify_person_from_encoding">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">identify_person_from_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#identify_person_from_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.identify_person_from_encoding" title="Link to this definition"></a></dt>
+<dd><p>Given an encoding, compare it to all encodings in the database to find the person’s name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding</strong> (<em>ndarray</em><em>(</em><em>128</em><em>,</em><em>)</em>) – Encoding to compare against all encodings in the database. Encoding of the person to identify.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enables debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Name of the person with the most matches or UNKNOWN if no matches were found</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.save_face_encoding">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">save_face_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#save_face_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.save_face_encoding" title="Link to this definition"></a></dt>
+<dd><p>Provided a face encoding and the name of the person in the image, save the encoding to that corresponding person’s
+encoding set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding</strong> (<em>memoryview</em>) – Face encoding generated by face_recognition.face_encodings()</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the person in the image</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – Name of the file the encoding was generated from (Example: George_W_Bush_0525.jpg)</p></li>
+<li><p><strong>source</strong> (<em>str</em>) – Source of the images. Default is ‘user’ (user provided)
+but can also be databases such as ‘lfw’ (Labeled Faces in the Wild).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True for successful save, False for error</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.local_facial_recognition.save_image">
+<span class="sig-prename descclassname"><span class="pre">src.local_facial_recognition.</span></span><span class="sig-name descname"><span class="pre">save_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/local_facial_recognition.html#save_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.local_facial_recognition.save_image" title="Link to this definition"></a></dt>
+<dd><p>Provided an image save it in the proper location given the person’s name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_location</strong> (<em>str</em>) – Path of a file (including file name)</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the person in the picture</p></li>
+<li><p><strong>new_file_name</strong> (<em>str</em>) – Name of the file to save the image as</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.s3_operations">
+<span id="src-s3-operations-module"></span><h2>src.s3_operations module<a class="headerlink" href="#module-src.s3_operations" title="Link to this heading"></a></h2>
+<p>This file contains functions for uploading, downloading, and deleting files from an S3 bucket.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.cleanup">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.cleanup" title="Link to this definition"></a></dt>
+<dd><p>Delete a file from an S3 bucket after it has been downloaded and is no longer needed online.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – Name of the file to delete from S3</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success state of the deletion – True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.download_from_aws">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">download_from_aws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#download_from_aws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.download_from_aws" title="Link to this definition"></a></dt>
+<dd><p>Download a file from an S3 bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – File name to download from S3</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success state of the download – True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.get_env_vars">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">get_env_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#get_env_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.get_env_vars" title="Link to this definition"></a></dt>
+<dd><p>Get the environment variables for the AWS S3 bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>S3 access key, S3 secret key, and S3 bucket name</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, str, str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.get_file_from_user">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">get_file_from_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#get_file_from_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.get_file_from_user" title="Link to this definition"></a></dt>
+<dd><p>Get an image file from the user and check that it exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to the file</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.upload_process">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">upload_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#upload_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.upload_process" title="Link to this definition"></a></dt>
+<dd><p>Get an image file from the user and upload it to S3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – Path to the file to upload to S3</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>File name on S3 or False if an error occurred</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.s3_operations.upload_to_aws">
+<span class="sig-prename descclassname"><span class="pre">src.s3_operations.</span></span><span class="sig-name descname"><span class="pre">upload_to_aws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/s3_operations.html#upload_to_aws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.s3_operations.upload_to_aws" title="Link to this definition"></a></dt>
+<dd><p>Upload a file to an S3 bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_file</strong> (<em>str</em>) – Path to the file to upload</p></li>
+<li><p><strong>s3_file</strong> (<em>str</em>) – File name to use on S3</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Enable debug mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success state of the upload – True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.user_contribution">
+<span id="src-user-contribution-module"></span><h2>src.user_contribution module<a class="headerlink" href="#module-src.user_contribution" title="Link to this heading"></a></h2>
+<p>This file contains the methods to handle user contributions to the local facial recognition database.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.user_contribution.ask_contribute">
+<span class="sig-prename descclassname"><span class="pre">src.user_contribution.</span></span><span class="sig-name descname"><span class="pre">ask_contribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/user_contribution.html#ask_contribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.user_contribution.ask_contribute" title="Link to this definition"></a></dt>
+<dd><p>Method to ask the user if they would like to contribute to the local facial recognition database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path of the file the user provided.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the user consents to contributing to the local db.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.user_contribution.contribute">
+<span class="sig-prename descclassname"><span class="pre">src.user_contribution.</span></span><span class="sig-name descname"><span class="pre">contribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upload_encoding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/user_contribution.html#contribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.user_contribution.contribute" title="Link to this definition"></a></dt>
+<dd><p>Method to add a user-provided image to the local facial recognition database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_location</strong> (<em>str</em>) – Local location of the file to add to the local db</p></li>
+<li><p><strong>upload_encoding</strong> (<em>ndarray</em><em>(</em><em>128</em><em>,</em><em>)</em>) – Pre-computed encoding of the image to add to the local db</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of the addition to the local db (True if successful, False otherwise) AND the name of the person</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.user_contribution.get_user_contributed_name">
+<span class="sig-prename descclassname"><span class="pre">src.user_contribution.</span></span><span class="sig-name descname"><span class="pre">get_user_contributed_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/user_contribution.html#get_user_contributed_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.user_contribution.get_user_contributed_name" title="Link to this definition"></a></dt>
+<dd><p>Method to request a name from the user to save to the local facial recognition database in case AWS Rekognize was
+unable to match their provided image to a known celebrity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Full name (first last) of the person in the user-provided photo.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to R-IBES: Reverse-Image Biographical Entity Search’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jacob Weber.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

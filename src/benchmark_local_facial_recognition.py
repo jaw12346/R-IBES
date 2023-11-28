@@ -8,8 +8,8 @@ import statistics
 from collections import namedtuple
 from alive_progress import alive_bar
 
-import local_facial_recognition as lfr
-import conversions
+from src import local_facial_recognition as lfr
+from src import conversions
 
 BenchmarkResult = namedtuple('BenchmarkResult',
                              ['match_count', 'fail_count', 'success_rate', 'compare_time'])

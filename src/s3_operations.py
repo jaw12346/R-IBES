@@ -4,6 +4,7 @@ This file contains functions for uploading, downloading, and deleting files from
 
 import os
 import boto3
+from PIL import Image
 from dotenv import dotenv_values
 from botocore.exceptions import NoCredentialsError, ClientError
 
@@ -11,6 +12,7 @@ from botocore.exceptions import NoCredentialsError, ClientError
 def get_env_vars():
     """
     Get the environment variables for the AWS S3 bucket.
+
     :return: S3 access key, S3 secret key, and S3 bucket name
     :rtype: str, str, str
     """
@@ -36,8 +38,15 @@ def get_file_from_user():
             print(f'Supported file types: {list(allowed_formats)}. Please try again!', end='\n\n')
             continue
         if os.path.exists(file_path):
-            return file_path
+            break
         print(f'The file "{file_path}" does not exist. Please try again!', end='\n\n')
+
+    # Convert image to grayscale
+    img = Image.open(file_path).convert('L')
+    file_format = file_path.split('.')[-1]
+    file_path = file_path.split('.')[0] + f'_grayscale.{file_format}'
+    img.save(file_path)
+    return file_path
 
 
 def upload_process(file_path, debug=False):

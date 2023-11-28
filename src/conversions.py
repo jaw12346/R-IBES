@@ -35,6 +35,7 @@ def encode_ndarray_to_memoryview(encoding):
 def get_normalized_name(name):
     """
     Standard conversion from a name to a normalized name (Jacob Weber -> jacob_weber)
+
     :param name: Name to normalize
     :type name: str
     :return: Normalized name (lowercase, underscores instead of spaces)
@@ -60,6 +61,7 @@ def get_dbpedia_name(name):
 def get_denormalized_name(normalized_name):
     """
     Standard conversion from a normalized name to a denormalized name (jacob_weber -> Jacob Weber)
+
     :param normalized_name: Name to denormalize
     :type normalized_name: str
     :return: Denormalized name (title case, spaces instead of underscores)

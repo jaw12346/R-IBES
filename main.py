@@ -167,7 +167,7 @@ def main():
                     if response in ('y', 'yes'):
                         if aws_detected.match_confidence > 0.9:
                             lfr.add_to_db(search_file_location, search_encoding, normalized_name)
-                            print(f'Added image to <{normalized_name}. Continuing with query...')
+                            print(f'Added image to <{normalized_name}>. Continuing with query...')
                         else:
                             print('AWS confidence was too low to add to local DB. Continuing with query...')
                         break

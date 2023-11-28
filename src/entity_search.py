@@ -3,7 +3,6 @@ File providing entity search functionality for the R-IBES system.
 """
 
 import json
-import time
 import os
 from collections import namedtuple
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.s3_operations &mdash; R-IBES: Reverse-Image Biographical Entity Search  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            R-IBES: Reverse-Image Biographical Entity Search
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src.html">src package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">R-IBES: Reverse-Image Biographical Entity Search</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.s3_operations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.s3_operations</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains functions for uploading, downloading, and deleting files from an S3 bucket.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">dotenv_values</span>
+<span class="kn">from</span> <span class="nn">botocore.exceptions</span> <span class="kn">import</span> <span class="n">NoCredentialsError</span><span class="p">,</span> <span class="n">ClientError</span>
+
+
+<div class="viewcode-block" id="get_env_vars">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.get_env_vars">[docs]</a>
+<span class="k">def</span> <span class="nf">get_env_vars</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the environment variables for the AWS S3 bucket.</span>
+
+<span class="sd">    :return: S3 access key, S3 secret key, and S3 bucket name</span>
+<span class="sd">    :rtype: str, str, str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="s2">&quot;.env&quot;</span><span class="p">)</span>
+    <span class="n">access_key</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;S3_ACCESS_KEY&#39;</span><span class="p">]</span>
+    <span class="n">secret_key</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;S3_SECRET_KEY&#39;</span><span class="p">]</span>
+    <span class="n">bucket_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;S3_BUCKET&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">bucket_name</span></div>
+
+
+
+<div class="viewcode-block" id="get_file_from_user">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.get_file_from_user">[docs]</a>
+<span class="k">def</span> <span class="nf">get_file_from_user</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get an image file from the user and check that it exists.</span>
+
+<span class="sd">    :return: Path to the file</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allowed_formats</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter the path to the face file you would like to search with: &#39;</span><span class="p">)</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">allowed_formats</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Supported file types: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_formats</span><span class="p">)</span><span class="si">}</span><span class="s1">. Please try again!&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The file &quot;</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s1">&quot; does not exist. Please try again!&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Convert image to grayscale</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">)</span>
+    <span class="n">file_format</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_grayscale.</span><span class="si">{</span><span class="n">file_format</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">file_path</span></div>
+
+
+
+<div class="viewcode-block" id="upload_process">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.upload_process">[docs]</a>
+<span class="k">def</span> <span class="nf">upload_process</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get an image file from the user and upload it to S3.</span>
+
+<span class="sd">    :param file_path: Path to the file to upload to S3</span>
+<span class="sd">    :type file_path: str</span>
+<span class="sd">    :param debug: Enable debug mode</span>
+<span class="sd">    :type debug: bool</span>
+<span class="sd">    :return: File name on S3 or False if an error occurred</span>
+<span class="sd">    :rtype: str or bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">uploaded</span> <span class="o">=</span> <span class="n">upload_to_aws</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">uploaded</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">file_name</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="upload_to_aws">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.upload_to_aws">[docs]</a>
+<span class="k">def</span> <span class="nf">upload_to_aws</span><span class="p">(</span><span class="n">local_file</span><span class="p">,</span> <span class="n">s3_file</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Upload a file to an S3 bucket.</span>
+
+<span class="sd">    :param local_file: Path to the file to upload</span>
+<span class="sd">    :type local_file: str</span>
+<span class="sd">    :param s3_file: File name to use on S3</span>
+<span class="sd">    :type s3_file: str</span>
+<span class="sd">    :param debug: Enable debug mode</span>
+<span class="sd">    :type debug: bool</span>
+<span class="sd">    :return: Success state of the upload -- True if successful, False otherwise</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">bucket_name</span> <span class="o">=</span> <span class="n">get_env_vars</span><span class="p">()</span>
+    <span class="n">s3_connection</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">access_key</span><span class="p">,</span> <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">secret_key</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">s3_connection</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">local_file</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">s3_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully uploaded </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">local_file</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> to S3 bucket </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The requested file </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">local_file</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> was not found. The file has likely been moved, renamed, &quot;</span>
+                  <span class="sa">f</span><span class="s2">&quot;or deleted.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">NoCredentialsError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to authenticate this session with AWS S3.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">unknown_exception</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown exception occurred: </span><span class="si">{</span><span class="n">unknown_exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sometimes this error occurs when the time is not set correctly on your machine.</span><span class="se">\n\t</span><span class="s1">&#39;</span>
+                  <span class="s1">&#39;Run `sudo hwclock -s`&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="download_from_aws">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.download_from_aws">[docs]</a>
+<span class="k">def</span> <span class="nf">download_from_aws</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download a file from an S3 bucket.</span>
+
+<span class="sd">    :param file_name: File name to download from S3</span>
+<span class="sd">    :type file_name: str</span>
+<span class="sd">    :param debug: Enable debug mode</span>
+<span class="sd">    :type debug: bool</span>
+<span class="sd">    :return: Success state of the download -- True if successful, False otherwise</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">bucket_name</span> <span class="o">=</span> <span class="n">get_env_vars</span><span class="p">()</span>
+    <span class="n">s3_connection</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">access_key</span><span class="p">,</span> <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">secret_key</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">temp_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;tmp&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+        <span class="n">s3_connection</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully downloaded </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> from S3 bucket </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">ClientError</span><span class="p">)</span> <span class="k">as</span> <span class="n">notfound_clienterr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The requested file </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> was not found in S3 bucket </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">notfound_clienterr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">NoCredentialsError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to authenticate this session with AWS S3.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">unknown_exception</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown exception occurred: </span><span class="si">{</span><span class="n">unknown_exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="cleanup">
+<a class="viewcode-back" href="../../src.html#src.s3_operations.cleanup">[docs]</a>
+<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete a file from an S3 bucket after it has been downloaded and is no longer needed online.</span>
+
+<span class="sd">    :param file_name: Name of the file to delete from S3</span>
+<span class="sd">    :type file_name: str</span>
+<span class="sd">    :param debug: Enable debug mode</span>
+<span class="sd">    :type debug: bool</span>
+<span class="sd">    :return: Success state of the deletion -- True if successful, False otherwise</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">bucket_name</span> <span class="o">=</span> <span class="n">get_env_vars</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="n">cleanup</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">s3_connection</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">access_key</span><span class="p">,</span> <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">secret_key</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">s3_connection</span><span class="o">.</span><span class="n">delete_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully deleted </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> from S3 bucket </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The requested file </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> was not found in S3 bucket </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">NoCredentialsError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to authenticate this session with AWS S3.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">unknown_exception</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown exception occurred: </span><span class="si">{</span><span class="n">unknown_exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jacob Weber.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
