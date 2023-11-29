@@ -87,7 +87,6 @@ def random_person_image(directory):
     :return: Path to the image
     :rtype: str
     """
-    cwd = os.getcwd()
     directory = directory.split('./')[-1]
     images = os.listdir(directory)
     return f'{directory}/{random.choice(images)}'
