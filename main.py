@@ -104,6 +104,9 @@ def main():
     if '--offline' in sys.argv:
         print('Running in offline mode.')
         offline = True
+    elif any(var == '' for var in s3_operations.get_env_vars()):
+        print('Running in offline mode because at least one S3 environment variable is missing in the .env file.')
+        offline = True
     if '--debug' in sys.argv:
         print('Running in debug mode.')
         debug = True
