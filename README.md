@@ -8,6 +8,8 @@ with over 13k images of celebrities. When an unknown face is provided, R-IBES qu
 name and/or asks the end-user to contribute, thus adding that person to the dataset with the goal of limiting cloud
 usage as more people are searched._
 
+Project documentation can be accessed by opening `/docs/index.html` in a web browser.
+
 ## Installation instructions (with a DB file)
 __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 3.10.12__
 
