@@ -21,7 +21,8 @@ __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 
     ```
    
 2) Run the following command in your Ubuntu instance to install prerequisites:
-    ```shell
+   ```shell
+    sudo apt-get update && sudo apt-get upgrade -y
     sudo apt-get install python3 python3-pip python3-venv graphviz graphviz-dev imagemagick
     ```
 
@@ -44,3 +45,15 @@ __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 
     python3 main.py [--offline]
     ```
    __Note:__ If you do not have a S3 bucket or keys, please add `--offline` to the startup command.
+
+## Troubleshooting steps:
+- If you get an AWS error...
+   - Make sure you have the correct keys in `.env` and that your bucket is in the same region
+      as your keys.
+   - Run `sudo hwclock -s` to sync your WSL instance to the system clock.
+- If you get a `ModuleNotFoundError`...
+   - Make sure you are running Python 3.10.12 or higher.
+   - Make sure you are running the `pip3` command and not `pip`.
+      - Re-run `pip3 install -r requirements.txt`.
+   - Make sure you are running the `python3` command and not `python`.
+   - Make sure that your current working directory is the project directory.
