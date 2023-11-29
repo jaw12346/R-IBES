@@ -10,6 +10,8 @@ usage as more people are searched._
 
 Project documentation can be accessed by opening `/docs/index.html` in a web browser.
 
+[**Video Demo**](https://youtu.be/0WFJzNKwvWk)
+
 ## Installation instructions (with a DB file)
 __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 3.10.12__
 
