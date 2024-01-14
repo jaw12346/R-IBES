@@ -42,7 +42,7 @@ __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 
 
 6) Run the following command to start R-IBES:
     ```shell
-    python3 main.py [--offline] [--debug]
+    python3 main.py [--offline]
     ```
    __Note:__ If you do not have a S3 bucket or keys, please add `--offline` to the startup command.
 
