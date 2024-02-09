@@ -20,24 +20,23 @@ __Note: R-IBES has only been tested on Ubuntu 22.04.3 LTS via WSL2 using Python 
     git clone https://github.com/jaw12346/R-IBES.git
     ```
    
-2) Run the following command in your Ubuntu instance to install prerequisites:
+2) Navigate to the project directory in your Ubuntu instance and execute the following command to install prerequisites:
    ```shell
-    sudo apt-get update && sudo apt-get upgrade -y
-    sudo apt-get install python3 python3-pip python3-venv graphviz graphviz-dev imagemagick
+    sudo ./setup.sh
     ```
 
-3) Navigate into the project directory and install the required pip packages
-    ```shell
-    pip3 install -r requirements.txt
-    ```
+3) If you have a database file, place it into the project directory.
 
-4) If you have a database file, place it into the project directory.
-
-5) (Optional) Open `.env` and change the following variables to match your environment:
+4) (Optional) Open `.env` and change the following variables to match your environment:
     ```shell
     S3_BUCKET=your_s3_bucket_name
     S3_ACCESS_KEY=your_aws_s3_access_key
     S3_SECRET_KEY=your_aws_s3_secret_key
+    ```
+
+5) Activate the virtual environment:
+    ```shell
+    source venv/bin/activate
     ```
 
 6) Run the following command to start R-IBES:
