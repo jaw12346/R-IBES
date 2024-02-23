@@ -24,11 +24,12 @@ def main(proceed=False):
         time.sleep(1)
 
     shutil.rmtree('./images', True)
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     if conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM NAME_DIRECTORY")
         cursor.execute("DELETE FROM NAME_ENCODING")
+        # cursor.execute("DELETE FROM ONTOLOGIES") # Purposefully not including ONTOLOGIES deletion
         conn.commit()
         conn.close()
         print('Database cleared successfully.')

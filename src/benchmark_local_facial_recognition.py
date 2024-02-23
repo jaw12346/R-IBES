@@ -22,7 +22,7 @@ def get_encodings():
     :return: All encodings from the database in form {name: [encoding1, encoding2, ...]}
     :rtype: dict{str, list(ndarray(128,))}
     """
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     cursor = conn.cursor()
     if conn:
         # Get all encodings from the database

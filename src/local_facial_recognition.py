@@ -33,7 +33,7 @@ def get_person_db_encodings(name, debug=False):
     :rtype: list(nd_array)
     """
 
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     cursor = conn.cursor()
     if conn:
         # Collect all encodings for the person
@@ -89,7 +89,7 @@ def save_image(file_location, name, new_file_name):
 
     normalized_name = conversions.get_normalized_name(name)
     output_directory = f'./images/{normalized_name}'
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     cursor = conn.cursor()
     if conn:
         # Check if the person exists in the database
@@ -134,7 +134,7 @@ def save_face_encoding(encoding, name, file_name, source='user'):
     """
 
     normalized_name = conversions.get_normalized_name(name)
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     if conn:
         cursor = conn.cursor()
         encoding = encoding.tobytes()  # Convert memoryview to a byte string
@@ -220,7 +220,7 @@ def get_person_directory(name):
     :return: Directory of the person
     :rtype: str or None
     """
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     cursor = conn.cursor()
     if conn:
         # Check if the person exists in the database
@@ -277,7 +277,7 @@ def identify_person_from_encoding(encoding, debug=False):
     """
     start_time = time.time()
 
-    conn = sqlite3.connect('./hw2.db')
+    conn = sqlite3.connect('./r-ibes.db')
     cursor = conn.cursor()
     if conn:
         # Get all encodings from the database
