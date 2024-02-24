@@ -38,10 +38,7 @@ def ontology_db():
     conn = sqlite3.connect('./r-ibes.db')
     print('Opened database successfully')
     try:
-        conn.execute('''CREATE TABLE ONTOLOGIES
-                            (RESOURCE       TEXT   NOT NULL,
-                             ONTOLOGY       TEXT   NOT NULL,
-                             TARGET_URI     TEXT   NOT NULL);''')
+        conn.execute('''CREATE TABLE ONTOLOGIES (ONTOLOGY TEXT NOT NULL);''')
         print('ONTOLOGIES table created successfully')
     except sqlite3.OperationalError as exception:
         print(f'Error creating ONTOLOGIES:\n{exception}')
@@ -66,13 +63,10 @@ def fill_ontologies():
                         # Extract the resource, ontology and target uri from the line
                         # Example: <http://dbpedia.org/resource/Barack_Obama> <http://dbpedia.org/ontology/residence> <http://dbpedia.org/resource/White_House>
                         # --> http://dbpedia.org/resource/Barack_Obama || residence || http://dbpedia.org/resource/White_House
-                        resource = line.split(' ')[0][1:-1]
                         ontology_uri = line.split(' ')[1][1:-1]
                         if '/ontology/' in ontology_uri:  # Some links are not ontologies (w3)
-                            ontology = ontology_uri.split('/')[-1][:-1]
-                            target_uri = line.split(' ')[2][1:]
-                            conn.execute(f"INSERT INTO ONTOLOGIES (RESOURCE, ONTOLOGY, TARGET_URI) "
-                                         f"VALUES (\"{resource}\", \"{ontology}\", \"{target_uri}\");")
+                            ontology = ontology_uri.split('/')[-1]
+                            conn.execute(f"INSERT INTO ONTOLOGIES (ONTOLOGY) VALUES (\"{ontology}\");")
                     if i % 100000 == 0:
                         # Needed to prevent the database from locking up
                         conn.commit()
@@ -81,9 +75,25 @@ def fill_ontologies():
             # Make sure the last changes are committed
             conn.commit()
             print('ONTOLOGIES table filled successfully')
+
+            print('Removing duplicates from ONTOLOGIES table...')
+            remove_duplicates(conn)  # Remove duplicate ontologies from the ONTOLOGY column
+            print('Duplicates removed successfully')
     except sqlite3.OperationalError as exception:
         print(f'Error filling ONTOLOGIES on line {i}:\n{exception}')
 
+
+def remove_duplicates(conn):
+    """
+    Remove duplicates from the ONTOLOGIES table.
+
+    :param conn: SQLite3 connection
+    :type conn: sqlite3.Connection
+    """
+    conn.execute("CREATE TABLE new_table AS SELECT DISTINCT ONTOLOGY FROM ONTOLOGIES;")
+    conn.execute("DROP TABLE ONTOLOGIES;")
+    conn.execute("ALTER TABLE new_table RENAME TO ONTOLOGIES;")
+    conn.commit()
 
 if __name__ == '__main__':
     main_db()
