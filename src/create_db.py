@@ -43,6 +43,7 @@ def create_db():
         else:
             raise exception
 
+    ontologies_exist = False
     try:
         conn.execute('''CREATE TABLE ONTOLOGIES
                             (ONTOLOGY       TEXT NOT NULL,
@@ -51,18 +52,23 @@ def create_db():
     except sqlite3.OperationalError as exception:
         if 'already exists' in str(exception):
             print('ONTOLOGIES table already exists. No action taken!')
+            ontologies_exist = True
         else:
             raise exception
     print(SPLITTER, '\n')
-    fill_ontologies()
+    if not ontologies_exist:
+        fill_ontologies(conn)
+    conn.close()
 
 
-def fill_ontologies():
+def fill_ontologies(conn):
     """
     Fill the ontology table with the data from mappingbased_objects_en.ttl.
     Data originates from https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.bz2
+
+    :param conn: SQLite3 connection
+    :type conn: sqlite3.Connection
     """
-    conn = sqlite3.connect('./r-ibes.db')
     line_count = 18746177  # Number of lines in mappingbased_objects_en.ttl at the time of writing
     i = 0
     try:

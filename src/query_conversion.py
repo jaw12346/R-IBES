@@ -14,9 +14,8 @@ def get_ontologies_from_db():
     """
     conn = sqlite3.connect('./r-ibes.db')
     print('Opened database successfully')
-    cursor = conn.execute('SELECT ONTOLOGY FROM ONTOLOGIES ORDER BY ONTOLOGY ASC')
+    cursor = conn.execute('SELECT ONTOLOGY, SPLIT_ONTOLOGY FROM ONTOLOGIES ORDER BY ONTOLOGY ASC')
     ontologies = cursor.fetchall()
-    ontologies = [value[0] for value in ontologies]
     conn.close()
     return ontologies
 
