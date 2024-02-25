@@ -2,11 +2,12 @@
 File providing conversion methods for the R-IBES system.
 """
 
+import re
 from numpy import frombuffer, float64
 
 ndarray_shape = (128,)
 __all__ = ['decode_memoryview_to_ndarray', 'encode_ndarray_to_memoryview', 'get_normalized_name',
-           'get_denormalized_name', 'ndarray_shape']
+           'get_denormalized_name', 'ndarray_shape', 'split_camelcase_to_lowercase']
 
 
 def decode_memoryview_to_ndarray(to_convert):
@@ -68,3 +69,20 @@ def get_denormalized_name(normalized_name):
     :rtype: str
     """
     return normalized_name.replace('_', ' ').title()
+
+
+def split_camelcase_to_lowercase(camel_case):
+    """
+    Split a camelCase string into lowercase words.
+    Example: 'birthPlace' -> 'birth place'
+
+    :param camel_case: CamelCase string to split into distinct words.
+    :type camel_case: str
+    :return: CamelCase string split into lowercase words.
+    :rtype: str
+    """
+    # FIXME: This doesn't work properly with acronyms (PGA -> p g a returned instead of PGA)
+    vals = re.findall('^[a-z]+|[A-Z][^A-Z]*', camel_case)
+    vals = [val.lower() for val in vals]
+    vals = ' '.join(vals)
+    return vals

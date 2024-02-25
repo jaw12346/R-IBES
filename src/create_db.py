@@ -5,12 +5,18 @@ Create the database and tables.
 import sqlite3
 from alive_progress import alive_bar
 
+from conversions import split_camelcase_to_lowercase
 
-def main_db():
+SPLITTER = '=' * 100
+
+
+def create_db():
     """
     Create the database and tables.
     """
     conn = sqlite3.connect('./r-ibes.db')  # DB file is stored outside the src directory
+    print(SPLITTER)
+    print('***CREATING DATABASE***\n')
     print('Opened database successfully')
     try:
         conn.execute('''CREATE TABLE NAME_DIRECTORY
@@ -19,7 +25,10 @@ def main_db():
                              ENCODING_COUNT   INT     NOT NULL);''')
         print('NAME_DIRECTORY table created successfully')
     except sqlite3.OperationalError as exception:
-        print(f'Error creating NAME_DIRECTORY:\n{exception}')
+        if 'already exists' in str(exception):
+            print('NAME_DIRECTORY table already exists. No action taken!')
+        else:
+            raise exception
 
     try:
         conn.execute('''CREATE TABLE NAME_ENCODING
@@ -29,30 +38,36 @@ def main_db():
                              SOURCE       TEXT    NOT NULL);''')
         print('NAME_ENCODING table created successfully')
     except sqlite3.OperationalError as exception:
-        print(f'Error creating NAME_ENCODING:\n{exception}')
+        if 'already exists' in str(exception):
+            print('NAME_ENCODING table already exists. No action taken!')
+        else:
+            raise exception
 
-def ontology_db():
-    """
-    Create the ontology table from https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.
-    """
-    conn = sqlite3.connect('./r-ibes.db')
-    print('Opened database successfully')
     try:
-        conn.execute('''CREATE TABLE ONTOLOGIES (ONTOLOGY TEXT NOT NULL);''')
+        conn.execute('''CREATE TABLE ONTOLOGIES
+                            (ONTOLOGY       TEXT NOT NULL,
+                             SPLIT_ONTOLOGY TEXT DEFAULT '');''')
         print('ONTOLOGIES table created successfully')
     except sqlite3.OperationalError as exception:
-        print(f'Error creating ONTOLOGIES:\n{exception}')
+        if 'already exists' in str(exception):
+            print('ONTOLOGIES table already exists. No action taken!')
+        else:
+            raise exception
+    print(SPLITTER, '\n')
+    fill_ontologies()
 
 
 def fill_ontologies():
     """
     Fill the ontology table with the data from mappingbased_objects_en.ttl.
+    Data originates from https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.bz2
     """
     conn = sqlite3.connect('./r-ibes.db')
-    print('Opened database successfully')
-    line_count = 18746177  # Number of lines in mappingbased_objects_en.ttl
-    i = 1
+    line_count = 18746177  # Number of lines in mappingbased_objects_en.ttl at the time of writing
+    i = 0
     try:
+        print(SPLITTER)
+        print('***FILLING ONTOLOGIES TABLE***\n')
         print('Attempting to open mappingbased_objects_en.ttl')
         with open('./mappingbased_objects_en.ttl', 'r') as file:
             print('Successfully opened mappingbased_objects_en.ttl')
@@ -76,11 +91,40 @@ def fill_ontologies():
             conn.commit()
             print('ONTOLOGIES table filled successfully')
 
+            # Remove duplicate ontologies from the ONTOLOGY column
             print('Removing duplicates from ONTOLOGIES table...')
-            remove_duplicates(conn)  # Remove duplicate ontologies from the ONTOLOGY column
+            print('\tThis may take a while depending on the number of duplicates!')
+            remove_duplicates(conn)
             print('Duplicates removed successfully')
+
+            # Split camelCase ontologies into distinct lowercase words
+            print('Splitting camelCase ontologies...')
+            split_ontologies(conn)
+            print('CamelCase ontologies split successfully')
+            print(SPLITTER, '\n')
     except sqlite3.OperationalError as exception:
-        print(f'Error filling ONTOLOGIES on line {i}:\n{exception}')
+        print(f'Error filling ONTOLOGIES on line {i}')
+        raise exception
+
+
+def split_ontologies(conn):
+    """
+    Split camelCase ontologies into distinct lowercase words and save them in the SPLIT_ONTOLOGY column.
+
+    :param conn: SQLite3 connection
+    :type conn: sqlite3.Connection
+    """
+    cursor = conn.execute('SELECT ONTOLOGY FROM ONTOLOGIES')
+    ontologies = cursor.fetchall()
+    ontologies = [value[0] for value in ontologies]
+    with alive_bar(len(ontologies), force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
+        for ontology in ontologies:
+            split_ontology = split_camelcase_to_lowercase(ontology)
+            conn.execute(
+                f"UPDATE ONTOLOGIES SET SPLIT_ONTOLOGY = \"{split_ontology}\" WHERE ONTOLOGY = \"{ontology}\";"
+            )
+            bar()
+        conn.commit()
 
 
 def remove_duplicates(conn):
@@ -91,11 +135,14 @@ def remove_duplicates(conn):
     :type conn: sqlite3.Connection
     """
     conn.execute("CREATE TABLE new_table AS SELECT DISTINCT ONTOLOGY FROM ONTOLOGIES;")
+    conn.commit()
     conn.execute("DROP TABLE ONTOLOGIES;")
+    conn.commit()
     conn.execute("ALTER TABLE new_table RENAME TO ONTOLOGIES;")
     conn.commit()
+    conn.execute("ALTER TABLE ONTOLOGIES ADD COLUMN SPLIT_ONTOLOGY TEXT DEFAULT '';")
+    conn.commit()
+
 
 if __name__ == '__main__':
-    main_db()
-    ontology_db()
-    fill_ontologies()
+    create_db()
