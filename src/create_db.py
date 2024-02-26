@@ -63,21 +63,21 @@ def create_db():
 
 def fill_ontologies(conn):
     """
-    Fill the ontology table with the data from mappingbased_objects_en.ttl.
+    Fill the ontology table with the data from ontologies.ttl (mappingbased_objects_en.ttl).
     Data originates from https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.bz2
 
     :param conn: SQLite3 connection
     :type conn: sqlite3.Connection
     """
-    line_count = 18746177  # Number of lines in mappingbased_objects_en.ttl at the time of writing
+    line_count = 18746176  # Number of lines in ontologies.ttl (mappingbased_objects_en.ttl) at the time of writing
     i = 0
     try:
         print(SPLITTER)
         print('***FILLING ONTOLOGIES TABLE***\n')
-        print('Attempting to open mappingbased_objects_en.ttl')
+        print('Attempting to open ontologies.ttl')
         try:
-            with open('./mappingbased_objects_en.ttl', 'r') as file:
-                print('Successfully opened mappingbased_objects_en.ttl')
+            with open('./ontologies.ttl', 'r') as file:
+                print('Successfully opened ontologies.ttl')
                 with alive_bar(line_count, force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
                     for line in file:
                         if line.startswith('<http'):  # Don't include non-link lines
@@ -110,7 +110,7 @@ def fill_ontologies(conn):
 
                 print(SPLITTER, '\n')
         except FileNotFoundError as exception:
-            print("Error opening mappingbased_objects_en.ttl.\n"
+            print("Error opening ontologies.ttl.\n"
                   "Please make sure it's located in the project root directory.")
             raise exception
     except sqlite3.OperationalError as exception:

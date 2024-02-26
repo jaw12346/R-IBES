@@ -11,6 +11,27 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Read flags
+while getopts "hd:" flag; do
+ case $flag in
+   h) # Handle the -h flag
+   # Display script help information
+    echo "Usage: setup.sh [-h] [-d]"
+    echo "-h: Display help information"
+    echo "-d: Enable developer mode (downloads the ontologies file from DBPedia for database creation)."
+   ;;
+   d) # Handle the -d flag
+   # Enable developer mode
+   dev_mode=true
+   ;;
+   # Process the specified file
+   \?)
+   # Handle invalid options
+    echo -e "${RED}Invalid option: -$OPTARG${NC}" >&2
+   ;;
+ esac
+done
+
 # Update the package list and upgrade the installed packages
 #apt-get update && apt-get upgrade -y
 
@@ -41,6 +62,16 @@ pip3 install -r requirements.txt
 # Download the spacy model
 echo -e "${YELLOW}Downloading the spacy model 'en_core_web_md'${NC}"
 python3 -m spacy download en_core_web_md
+
+if [ "$dev_mode" = true ] ; then
+  # Download the ontologies file from DBPedia
+  echo -e "${YELLOW}Downloading the ontologies file from DBPedia${NC}"
+  wget -O ontologies.ttl.bz2 https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.bz2
+
+  # Extract the ontologies file
+  echo -e "${YELLOW}Extracting the ontologies file${NC}"
+  bunzip2 ontologies.ttl.bz2
+fi
 
 # Print a success message
 echo -e "${GREEN}Done!${NC}"
