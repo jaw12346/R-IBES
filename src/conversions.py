@@ -3,12 +3,11 @@ File providing conversion methods for the R-IBES system.
 """
 
 import re
-import spacy
 from numpy import frombuffer, float64
 
 ndarray_shape = (128,)
 __all__ = ['decode_memoryview_to_ndarray', 'encode_ndarray_to_memoryview', 'get_normalized_name',
-           'get_denormalized_name', 'ndarray_shape', 'split_camelcase_to_lowercase', 'nlp_to_bytes', 'bytes_to_nlp',]
+           'get_denormalized_name', 'ndarray_shape', 'split_camelcase_to_lowercase']
 
 
 def decode_memoryview_to_ndarray(to_convert):
@@ -87,29 +86,3 @@ def split_camelcase_to_lowercase(camel_case):
     vals = [val.lower() for val in vals]
     vals = ' '.join(vals)
     return vals
-
-
-def nlp_to_bytes(nlp_obj):
-    """
-    Convert a spaCy NLP object to bytes for use as a SQLite BLOB.
-
-    :param nlp_obj: spaCy NLP object
-    :type nlp_obj: spacy.tokens.doc.Doc
-    :return: Bytes of the spaCy NLP object
-    :rtype: bytes
-    """
-    return memoryview(nlp_obj.to_bytes()).tobytes()
-
-
-def bytes_to_nlp(nlp_bytes, config):
-    """
-    Convert bytes to a spaCy NLP object.
-
-    :param nlp_bytes: Bytes of a spaCy NLP object
-    :type nlp_bytes: bytes
-    :param config: Configuration for the spaCy NLP object
-    :type config: spacy.Language
-    :return: spaCy NLP object
-    :rtype: spacy.tokens.doc.Doc
-    """
-    return config.from_bytes(nlp_bytes)

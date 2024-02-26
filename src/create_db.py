@@ -3,10 +3,9 @@ Create the database and tables.
 """
 
 import sqlite3
-import spacy
 from alive_progress import alive_bar
 
-from conversions import split_camelcase_to_lowercase, nlp_to_bytes, bytes_to_nlp
+from conversions import split_camelcase_to_lowercase
 
 SPLITTER = '=' * 100
 
@@ -48,8 +47,7 @@ def create_db():
     try:
         conn.execute('''CREATE TABLE ONTOLOGIES
                             (ONTOLOGY       TEXT NOT NULL,
-                             SPLIT_ONTOLOGY TEXT DEFAULT '',
-                             NLP            BLOB);''')
+                             SPLIT_ONTOLOGY TEXT DEFAULT '');''')
         print('ONTOLOGIES table created successfully')
     except sqlite3.OperationalError as exception:
         if 'already exists' in str(exception):
@@ -110,11 +108,6 @@ def fill_ontologies(conn):
                 split_ontologies(conn)
                 print('CamelCase ontologies split successfully')
 
-                # Pre-process spacy nlps
-                print('Pre-processing spacy nlps...')
-                pre_process_spacy_nlps(conn)
-                print('Spacy nlps pre-processed successfully')
-
                 print(SPLITTER, '\n')
         except FileNotFoundError as exception:
             print("Error opening mappingbased_objects_en.ttl.\n"
@@ -123,27 +116,6 @@ def fill_ontologies(conn):
     except sqlite3.OperationalError as exception:
         print(f'Error filling ONTOLOGIES on line {i}')
         raise exception
-
-
-def pre_process_spacy_nlps(conn):
-    """
-    Pre-process spacy nlps and save them in the NLP column.
-
-    :param conn: SQLite3 connection
-    :type conn: sqlite3.Connection
-    """
-    nlp = spacy.load('en_core_web_md')
-    cursor = conn.execute('SELECT ONTOLOGY, SPLIT_ONTOLOGY FROM ONTOLOGIES')
-    rows = cursor.fetchall()
-    rows = [value for value in rows]
-    with alive_bar(len(rows), force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
-        for ontology, split_ontology in rows:
-            doc = nlp(split_ontology)
-            doc_bytes = nlp_to_bytes(doc)
-            update_query = "UPDATE ONTOLOGIES SET NLP = ? WHERE ONTOLOGY = ? AND SPLIT_ONTOLOGY = ?"
-            conn.execute(update_query, (doc_bytes, ontology, split_ontology))
-            bar()
-        conn.commit()
 
 
 def split_ontologies(conn):
@@ -180,7 +152,6 @@ def remove_duplicates(conn):
     conn.execute("ALTER TABLE new_table RENAME TO ONTOLOGIES;")
     conn.commit()
     conn.execute("ALTER TABLE ONTOLOGIES ADD COLUMN SPLIT_ONTOLOGY TEXT DEFAULT '';")
-    conn.execute("ALTER TABLE ONTOLOGIES ADD COLUMN NLP BLOB;")
     conn.commit()
 
 

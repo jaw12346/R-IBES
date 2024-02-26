@@ -2,10 +2,7 @@
 The purpose of this file is to provide a space for drafting methods necessary for
 converting user queries into exclusively ontologies.
 """
-import spacy
 import sqlite3
-
-from conversions import bytes_to_nlp
 
 
 def get_ontologies_from_db():
@@ -17,7 +14,7 @@ def get_ontologies_from_db():
     """
     conn = sqlite3.connect('./r-ibes.db')
     print('Opened database successfully')
-    cursor = conn.execute('SELECT ONTOLOGY, SPLIT_ONTOLOGY, NLP FROM ONTOLOGIES ORDER BY ONTOLOGY ASC')
+    cursor = conn.execute('SELECT ONTOLOGY, SPLIT_ONTOLOGY FROM ONTOLOGIES ORDER BY ONTOLOGY ASC')
     ontologies = cursor.fetchall()
     conn.close()
     return ontologies
@@ -46,23 +43,5 @@ def get_word_variations(index, query):
     return results
 
 
-def read_ontology_bytes():
-    """
-    Read the ontology bytes from the database.
-    """
-    conn = sqlite3.connect('./r-ibes.db')
-    cursor = conn.execute('SELECT SPLIT_ONTOLOGY, NLP FROM ONTOLOGIES')
-    ontologies = cursor.fetchall()
-    conn.close()
-
-    returnable = {}
-    nlp = spacy.load('en_core_web_md')
-    for ontology, ont_bytes in ontologies:
-        nlp_obj = bytes_to_nlp(ont_bytes, nlp)
-        returnable[ontology] = nlp_obj
-    return returnable
-
-
 if __name__ == '__main__':
     query = 'areacode of birth place'
-    # queries_to_ontologies(query)
