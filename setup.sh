@@ -41,6 +41,8 @@ echo -e "${YELLOW}Installing the system dependencies from requirements.system${N
 cat requirements.system | xargs apt install -y
 echo -e "${GREEN}Finished installing system dependencies${NC}"
 
+python3 -m pip install venv
+
 VENV_DIR="venv"
 ACTIVATE_FILE="./venv/bin/activate"
 if [ ! -d "$VENV_DIR" ]; then
@@ -71,7 +73,7 @@ if [ "$dev_mode" = true ] ; then
 
   # Extract the ontologies file
   echo -e "${YELLOW}Extracting the ontologies file${NC}"
-  bunzip2 ontologies.ttl.bz2
+  lbzip2 -d ontologies.ttl.bz2
 fi
 
 # Print a success message

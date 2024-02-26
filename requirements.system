@@ -4,3 +4,5 @@ python3-venv
 graphviz
 graphviz-dev
 imagemagick
+cmake
+lbzip2
