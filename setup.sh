@@ -38,6 +38,10 @@ echo -e "${YELLOW}Installing the Python dependencies from requirements.txt${NC}"
 pip3 install wheel
 pip3 install -r requirements.txt
 
+# Download the spacy model
+echo -e "${YELLOW}Downloading the spacy model 'en_core_web_md'${NC}"
+python3 -m spacy download en_core_web_md
+
 # Print a success message
 echo -e "${GREEN}Done!${NC}"
 echo -e "${GREEN}Activate the virtual environment by running 'source venv/bin/activate' and run the app with 'python3 main.py'${NC}"

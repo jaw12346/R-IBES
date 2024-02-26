@@ -3,9 +3,10 @@ Create the database and tables.
 """
 
 import sqlite3
+import spacy
 from alive_progress import alive_bar
 
-from conversions import split_camelcase_to_lowercase
+from conversions import split_camelcase_to_lowercase, nlp_to_bytes, bytes_to_nlp
 
 SPLITTER = '=' * 100
 
@@ -47,7 +48,8 @@ def create_db():
     try:
         conn.execute('''CREATE TABLE ONTOLOGIES
                             (ONTOLOGY       TEXT NOT NULL,
-                             SPLIT_ONTOLOGY TEXT DEFAULT '');''')
+                             SPLIT_ONTOLOGY TEXT DEFAULT '',
+                             NLP            BLOB);''')
         print('ONTOLOGIES table created successfully')
     except sqlite3.OperationalError as exception:
         if 'already exists' in str(exception):
@@ -75,42 +77,73 @@ def fill_ontologies(conn):
         print(SPLITTER)
         print('***FILLING ONTOLOGIES TABLE***\n')
         print('Attempting to open mappingbased_objects_en.ttl')
-        with open('./mappingbased_objects_en.ttl', 'r') as file:
-            print('Successfully opened mappingbased_objects_en.ttl')
-            print('Filling ONTOLOGIES table...')
-            with alive_bar(line_count, force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
-                for line in file:
-                    if line.startswith('<http'):  # Don't include non-link lines
-                        # Extract the resource, ontology and target uri from the line
-                        # Example: <http://dbpedia.org/resource/Barack_Obama> <http://dbpedia.org/ontology/residence> <http://dbpedia.org/resource/White_House>
-                        # --> http://dbpedia.org/resource/Barack_Obama || residence || http://dbpedia.org/resource/White_House
-                        ontology_uri = line.split(' ')[1][1:-1]
-                        if '/ontology/' in ontology_uri:  # Some links are not ontologies (w3)
-                            ontology = ontology_uri.split('/')[-1]
-                            conn.execute(f"INSERT INTO ONTOLOGIES (ONTOLOGY) VALUES (\"{ontology}\");")
-                    if i % 100000 == 0:
-                        # Needed to prevent the database from locking up
-                        conn.commit()
-                    i += 1
-                    bar()  # Update progress bar
-            # Make sure the last changes are committed
-            conn.commit()
-            print('ONTOLOGIES table filled successfully')
+        try:
+            with open('./mappingbased_objects_en.ttl', 'r') as file:
+                print('Successfully opened mappingbased_objects_en.ttl')
+                with alive_bar(line_count, force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
+                    for line in file:
+                        if line.startswith('<http'):  # Don't include non-link lines
+                            # Extract the resource, ontology and target uri from the line
+                            # Example: <http://dbpedia.org/resource/Barack_Obama> <http://dbpedia.org/ontology/residence> <http://dbpedia.org/resource/White_House>
+                            # --> http://dbpedia.org/resource/Barack_Obama || residence || http://dbpedia.org/resource/White_House
+                            ontology_uri = line.split(' ')[1][1:-1]
+                            if '/ontology/' in ontology_uri:  # Some links are not ontologies (w3)
+                                ontology = ontology_uri.split('/')[-1]
+                                conn.execute(f"INSERT INTO ONTOLOGIES (ONTOLOGY) VALUES (\"{ontology}\");")
+                        if i % 100000 == 0:
+                            # Needed to prevent the database from locking up
+                            conn.commit()
+                        i += 1
+                        bar()  # Update progress bar
+                # Make sure the last changes are committed
+                conn.commit()
+                print('ONTOLOGIES table filled successfully')
 
-            # Remove duplicate ontologies from the ONTOLOGY column
-            print('Removing duplicates from ONTOLOGIES table...')
-            print('\tThis may take a while depending on the number of duplicates!')
-            remove_duplicates(conn)
-            print('Duplicates removed successfully')
+                # Remove duplicate ontologies from the ONTOLOGY column
+                print('Removing duplicates from ONTOLOGIES table...')
+                print('\tThis may take a while depending on the number of duplicates!')
+                remove_duplicates(conn)
+                print('Duplicates removed successfully')
 
-            # Split camelCase ontologies into distinct lowercase words
-            print('Splitting camelCase ontologies...')
-            split_ontologies(conn)
-            print('CamelCase ontologies split successfully')
-            print(SPLITTER, '\n')
+                # Split camelCase ontologies into distinct lowercase words
+                print('Splitting camelCase ontologies...')
+                split_ontologies(conn)
+                print('CamelCase ontologies split successfully')
+
+                # Pre-process spacy nlps
+                print('Pre-processing spacy nlps...')
+                pre_process_spacy_nlps(conn)
+                print('Spacy nlps pre-processed successfully')
+
+                print(SPLITTER, '\n')
+        except FileNotFoundError as exception:
+            print("Error opening mappingbased_objects_en.ttl.\n"
+                  "Please make sure it's located in the project root directory.")
+            raise exception
     except sqlite3.OperationalError as exception:
         print(f'Error filling ONTOLOGIES on line {i}')
         raise exception
+
+
+def pre_process_spacy_nlps(conn):
+    """
+    Pre-process spacy nlps and save them in the NLP column.
+
+    :param conn: SQLite3 connection
+    :type conn: sqlite3.Connection
+    """
+    nlp = spacy.load('en_core_web_md')
+    cursor = conn.execute('SELECT ONTOLOGY, SPLIT_ONTOLOGY FROM ONTOLOGIES')
+    rows = cursor.fetchall()
+    rows = [value for value in rows]
+    with alive_bar(len(rows), force_tty=True) as bar:  # Progress bar, force_tty=True for PyCharm
+        for ontology, split_ontology in rows:
+            doc = nlp(split_ontology)
+            doc_bytes = nlp_to_bytes(doc)
+            update_query = "UPDATE ONTOLOGIES SET NLP = ? WHERE ONTOLOGY = ? AND SPLIT_ONTOLOGY = ?"
+            conn.execute(update_query, (doc_bytes, ontology, split_ontology))
+            bar()
+        conn.commit()
 
 
 def split_ontologies(conn):
@@ -147,6 +180,7 @@ def remove_duplicates(conn):
     conn.execute("ALTER TABLE new_table RENAME TO ONTOLOGIES;")
     conn.commit()
     conn.execute("ALTER TABLE ONTOLOGIES ADD COLUMN SPLIT_ONTOLOGY TEXT DEFAULT '';")
+    conn.execute("ALTER TABLE ONTOLOGIES ADD COLUMN NLP BLOB;")
     conn.commit()
 
 
