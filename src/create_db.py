@@ -5,7 +5,7 @@ Create the database and tables.
 import sqlite3
 from alive_progress import alive_bar
 
-from conversions import split_camelcase_to_lowercase
+from src.conversions import split_camelcase_to_lowercase
 
 SPLITTER = '=' * 100
 

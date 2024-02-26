@@ -18,12 +18,13 @@ while getopts "hd" flag; do
    # Display script help information
     echo "Usage: setup.sh [-h] [-d]"
     echo "-h: Display help information"
-    echo "-d: Enable developer mode (downloads the ontologies file from DBPedia for database creation)."
+    echo "-d: Enable download mode (downloads the ontologies file from DBPedia for database creation)."
+    exit 0
    ;;
    d) # Handle the -d flag
    # Enable developer mode
-   dev_mode=true
-   echo "Developer/download mode enabled!"
+   download_mode=true
+   echo "Download mode enabled!"
    ;;
    # Process the specified file
    \?)
@@ -41,7 +42,7 @@ echo -e "${YELLOW}Installing the system dependencies from requirements.system${N
 cat requirements.system | xargs apt install -y
 echo -e "${GREEN}Finished installing system dependencies${NC}"
 
-python3 -m pip install venv
+pip3 install virtualenv
 
 VENV_DIR="venv"
 ACTIVATE_FILE="./venv/bin/activate"
@@ -66,7 +67,7 @@ pip3 install -r requirements.txt
 echo -e "${YELLOW}Downloading the spacy model 'en_core_web_md'${NC}"
 python3 -m spacy download en_core_web_md
 
-if [ "$dev_mode" = true ] ; then
+if [ "$download_mode" = true ] ; then
   # Download the ontologies file from DBPedia
   echo -e "${YELLOW}Downloading the ontologies file from DBPedia${NC}"
   wget -O ontologies.ttl.bz2 https://downloads.dbpedia.org/current/core/mappingbased_objects_en.ttl.bz2
