@@ -12,7 +12,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Read flags
-while getopts "hd:" flag; do
+while getopts "hd" flag; do
  case $flag in
    h) # Handle the -h flag
    # Display script help information
@@ -23,6 +23,7 @@ while getopts "hd:" flag; do
    d) # Handle the -d flag
    # Enable developer mode
    dev_mode=true
+   echo "Developer/download mode enabled!"
    ;;
    # Process the specified file
    \?)
